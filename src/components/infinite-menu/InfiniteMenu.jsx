@@ -374,42 +374,55 @@ const InfiniteMenu = ({
       const ctx = atlas.canvas.getContext('2d');
       ctx?.clearRect(0, 0, atlas.canvas.width, atlas.canvas.height);
       uploadAtlas();
+      state.started = false;
       state.count = 0;
       layout();
-      let pending = list.length;
-      if (!pending) state.started = true;
-      list.forEach((item, index) => {
-        const image = new Image();
-        image.crossOrigin = 'anonymous';
-        image.decoding = 'async';
-        const done = () => {
-          pending -= 1;
-          if (pending <= 0) state.started = true;
-          wake();
-        };
-        image.onload = () => {
-          if (!alive || request !== atlas.request || !ctx) return;
-          const size = atlas.cell;
-          const scale = Math.max(size / image.naturalWidth, size / image.naturalHeight);
-          const width = image.naturalWidth * scale;
-          const height = image.naturalHeight * scale;
-          const x = (index % atlas.cells) * size;
-          const y = Math.floor(index / atlas.cells) * size;
-          ctx.save();
-          ctx.beginPath();
-          ctx.rect(x, y, size, size);
-          ctx.clip();
-          ctx.drawImage(image, x + (size - width) / 2, y + (size - height) / 2, width, height);
-          ctx.restore();
-          atlas.dirty = true;
-          done();
-        };
-        image.onerror = () => {
-          if (!alive || request !== atlas.request) return;
-          done();
-        };
-        image.src = item?.image ?? '';
-      });
+      let nextIndex = 0;
+      let inFlight = 0;
+      let completed = 0;
+      let loaded = 0;
+      const concurrency = 4;
+      const startNext = () => {
+        while (inFlight < concurrency && nextIndex < list.length) {
+          const index = nextIndex++;
+          const item = list[index];
+          inFlight += 1;
+          const image = new Image();
+          image.crossOrigin = 'anonymous';
+          image.decoding = 'async';
+          const done = success => {
+            if (!alive || request !== atlas.request) return;
+            inFlight -= 1;
+            completed += 1;
+            if (success) loaded += 1;
+            if (loaded >= Math.min(3, list.length) || completed >= list.length) state.started = true;
+            wake();
+            startNext();
+          };
+          image.onload = () => {
+            if (!alive || request !== atlas.request || !ctx) { done(false); return; }
+            const size = atlas.cell;
+            const scale = Math.max(size / image.naturalWidth, size / image.naturalHeight);
+            const width = image.naturalWidth * scale;
+            const height = image.naturalHeight * scale;
+            const x = (index % atlas.cells) * size;
+            const y = Math.floor(index / atlas.cells) * size;
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(x, y, size, size);
+            ctx.clip();
+            ctx.drawImage(image, x + (size - width) / 2, y + (size - height) / 2, width, height);
+            ctx.restore();
+            atlas.dirty = true;
+            done(true);
+          };
+          image.onerror = () => done(false);
+          if (item?.image) image.src = item.image;
+          else done(false);
+        }
+      };
+      if (!list.length) state.started = true;
+      else startNext();
     };
 
     const tileRadius = () =>

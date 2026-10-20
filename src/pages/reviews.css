@@ -98,3 +98,125 @@
 @media(max-width:360px){.reviews-tabs button{font-size:11px;padding:0 8px}.reviews-toolbar{grid-template-columns:minmax(0,1fr) 122px}.reviews-sort select{font-size:10px}.reviews-search{gap:5px}.reviews-search input::placeholder{font-size:10px}.story-copy{padding:21px}.story-copy h3{font-size:24px}.reviews-intro h2{font-size:35px}.story-dialog-copy h2{font-size:27px}}
 @media(prefers-reduced-motion:reduce){.story-card,.story-media>img,.story-media-arrow,.story-read-more svg,.reviews-action,.reviews-hero-link>span,.reviews-tabs button{transition:none}.story-card:hover,.story-card:hover .story-media>img,.reviews-action:hover,.story-read-more:hover svg{transform:none}.story-skeleton>div,.story-skeleton>span{animation:none}}
 .reviews-partial-notice{padding:16px 20px;border:1px solid #d7e3f7;border-radius:12px;background:var(--sky);font-size:12px;line-height:1.75;color:var(--muted);margin:0 0 22px}.reviews-partial-notice button{border:0;background:none;padding:0;color:var(--blue);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* Keep the story viewer in one viewport and give it a more deliberate card frame. */
+.story-dialog{
+  width:min(1120px,calc(100vw - 48px));
+  height:min(700px,calc(100dvh - 48px));
+  max-height:calc(100dvh - 48px);
+  overflow:hidden;
+  border:1px solid #d8e4f6;
+  border-radius:30px;
+  background:#fff;
+  box-shadow:0 32px 90px #08172f55,0 0 0 6px #ffffff24;
+}
+.story-dialog-inner{
+  display:grid;
+  grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);
+  width:100%;
+  height:100%;
+  min-height:0;
+  background:#fff;
+}
+.story-dialog-close{
+  top:18px;
+  right:18px;
+  width:44px;
+  height:44px;
+  border:1px solid #dbe5f3;
+  background:#fff;
+  box-shadow:0 6px 20px #12284a18;
+}
+.story-dialog-media{
+  display:grid;
+  place-items:center;
+  min-width:0;
+  min-height:0;
+  height:100%;
+  padding:22px;
+  background:linear-gradient(145deg,#101b2b,#192b43);
+}
+.story-dialog-media>img,
+.story-dialog-media>iframe,
+.story-dialog-media>video{
+  display:block;
+  width:100%;
+  height:100%;
+  max-height:none;
+  aspect-ratio:auto;
+  border:0;
+  border-radius:20px;
+  object-fit:contain;
+}
+.story-dialog-media>.story-image-empty{
+  min-height:0;
+  height:100%;
+  border-radius:20px;
+}
+.story-dialog-copy{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  padding:clamp(28px,4vw,54px);
+  background:linear-gradient(155deg,#fff 65%,#f6f9ff);
+}
+.story-dialog-copy>.story-type{margin-bottom:10px}
+.story-dialog-copy h2{
+  margin:0 0 16px;
+  font-size:clamp(30px,3.6vw,48px);
+  line-height:1.06;
+}
+.story-full-description{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:5;
+  overflow:hidden;
+  font-size:14px;
+  line-height:1.7;
+}
+.story-facts{
+  gap:16px 24px;
+  padding-top:20px;
+  margin-top:20px;
+}
+.story-dialog-actions{
+  justify-content:flex-start;
+  gap:16px;
+  margin-top:24px;
+}
+@media(max-width:700px){
+  .story-dialog{
+    width:calc(100vw - 24px);
+    height:min(820px,calc(100dvh - 24px));
+    max-height:calc(100dvh - 24px);
+    border-radius:24px;
+  }
+  .story-dialog-inner{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(0,42fr) minmax(0,58fr);
+  }
+  .story-dialog-media{padding:12px}
+  .story-dialog-media>img,
+  .story-dialog-media>iframe,
+  .story-dialog-media>video{border-radius:15px}
+  .story-dialog-close{top:12px;right:12px;width:42px;height:42px}
+  .story-dialog-copy{padding:20px 22px 22px}
+  .story-dialog-copy>.story-type{margin-bottom:7px}
+  .story-dialog-copy h2{font-size:clamp(25px,7vw,34px);margin-bottom:10px}
+  .story-full-description{-webkit-line-clamp:3;font-size:12px;line-height:1.55;margin:0}
+  .story-facts{gap:12px 18px;padding-top:13px;margin-top:13px}
+  .story-facts dt{font-size:9px;margin-bottom:4px}
+  .story-facts dd{font-size:11px}
+  .story-dialog-actions{gap:12px;margin-top:15px}
+}
+@media(max-width:540px){
+  .story-dialog{border-radius:20px}
+  .story-dialog-inner{grid-template-rows:minmax(0,38fr) minmax(0,62fr)}
+  .story-dialog-copy{padding:17px 18px 18px}
+  .story-dialog-actions{align-items:flex-start;flex-direction:column}
+  .story-dialog-actions .button{width:100%;min-height:46px}
+  .story-dialog-copy h2{font-size:clamp(24px,7vw,30px)}
+}

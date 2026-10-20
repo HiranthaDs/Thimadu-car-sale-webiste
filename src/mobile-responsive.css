@@ -1,0 +1,90 @@
+/* Shared responsive guardrails for every route and shared component. */
+html { overflow-x: clip; }
+body, #root, main, .route-content, section, .container { min-width: 0; }
+img, video, iframe { max-width: 100%; }
+input, select, textarea, button { max-width: 100%; }
+
+@media (max-width: 1024px) {
+  .container { width: calc(100% - 56px); }
+  .footer-top { gap: 28px; }
+  .inv-cards, .reviews-grid { gap: 20px; }
+}
+
+@media (max-width: 767px) {
+  html { scroll-padding-top: 88px; }
+  body { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
+  .container { width: calc(100% - 36px); }
+  .section { padding-block: 62px; }
+  .page-hero { padding: 132px 0 52px; }
+  .page-hero h1 { font-size: clamp(38px, 9.5vw, 62px); overflow-wrap: anywhere; }
+  .page-hero-description { max-width: 100%; }
+  .button-row { gap: 10px; }
+  .btn { min-height: 48px; }
+
+  /* Keep the fixed quick actions clear of the iPhone home indicator. */
+  .nav-mobile-actions { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .nav-mobile-actions > a, .nav-mobile-actions > button { min-width: 0; gap: 6px; padding-inline: 8px; font-size: 10px; }
+  .premium-mobile-navigation.mobile-navigation { padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+
+  .collection-heading, .reviews-intro, .delivery-heading,
+  .delivery-row-heading, .detail-related-heading { min-width: 0; }
+  .collection-heading > *, .reviews-toolbar > *, .inv-toolbar > *,
+  .footer-top > *, .footer-bottom > *, .service-enquiry-grid > * { min-width: 0; }
+  .home-search, .collection-search-panel .home-search,
+  .inv-search, .reviews-search, .not-found-search { min-width: 0; }
+  .home-search input, .inv-search input, .reviews-search input,
+  .not-found-search input { min-width: 0; font-size: 16px; }
+
+  .inv-toolbar-actions { flex-wrap: wrap; }
+  .inv-sort { min-width: 0; }
+  .inv-sort select { min-width: 0; }
+  .detail-heading h1 { max-width: 100%; overflow-wrap: anywhere; }
+  .detail-share { flex-shrink: 0; }
+  .detail-main-photo img, .detail-lightbox > img { object-fit: contain; }
+
+  .reviews-toolbar { min-width: 0; }
+  .reviews-tabs button { min-width: 0; }
+  .story-dialog { width: calc(100% - 20px); max-height: calc(100dvh - 20px); }
+  .story-dialog-media iframe, .story-dialog-media video { max-height: 55dvh; }
+
+  .delivery-row-video { min-width: 0; }
+  .delivery-rail { overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+  .video-coverflow-stage { overflow: hidden; }
+  .jt-tabs-wrap { scroll-margin-top: 90px; }
+  .jt-chapter-copy, .jt-chapter-visual { min-width: 0; }
+  .service-form { min-width: 0; }
+  .service-form input, .service-form select, .service-form textarea { width: 100%; min-width: 0; font-size: 16px; }
+
+  .footer-enquiry, .footer-links-panel { min-width: 0; }
+  .footer-enquiry { padding-inline: clamp(18px, 5vw, 30px); }
+  .footer-wordmark { max-width: 100%; overflow: hidden; }
+  .footer-top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .footer-top > div { min-width: 0; }
+  .footer-top > div > a:not(.brand) { overflow-wrap: anywhere; }
+  .footer-bottom { align-items: center; }
+}
+
+@media (max-width: 390px) {
+  .container { width: calc(100% - 28px); }
+  .premium-header .premium-nav-shell { gap: 6px; padding-inline: 8px; }
+  .premium-header .brand-logo { width: 72px; }
+  .premium-header .premium-contact { width: 36px; min-width: 36px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
+  .premium-header .premium-contact svg { width: 16px; height: 16px; }
+  .nav-utilities { gap: 4px; }
+  .nav-search-trigger, .premium-header .premium-menu-toggle { width: 36px; min-width: 36px; }
+  .nav-mobile-actions { gap: 6px; padding-inline: 8px; }
+  .nav-mobile-actions > a, .nav-mobile-actions > button { font-size: 9px; }
+  .footer-top { gap: 24px 14px; }
+  .footer-links-panel { padding-inline: 17px; }
+  .collection-discovery nav { width: 100%; }
+  .collection-discovery a { max-width: 100%; }
+  .delivery-row-video { padding-inline: 13px; }
+  .detail-enquiry { padding-inline: 19px; }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .premium-mobile-navigation.mobile-navigation { max-height: 100dvh; overflow-y: auto; }
+  .nav-search-dialog, .nav-search-panel { max-height: calc(100dvh - 16px); }
+  .nav-search-preview { min-height: 0; }
+  .nav-mobile-actions { padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
+}

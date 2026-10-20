@@ -4,5 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import './styles.css';
 import App from './App';
 import './reference-design.css';
+import './mobile-responsive.css';
 
 createRoot(document.getElementById('root')).render(<BrowserRouter><App /></BrowserRouter>);

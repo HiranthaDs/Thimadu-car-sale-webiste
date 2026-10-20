@@ -36,7 +36,7 @@ export function CustomerStories() {
       started = true;
       import('../pages/ReviewsPage').then(({ loadStories }) => loadStories(controller.signal)).then((records) => {
         if (!controller.signal.aborted) {
-          setStories(records.sort((a, b) => a.order - b.order).slice(0, 12));
+          setStories(records.sort((a, b) => a.order - b.order));
           setStatus('ready');
         }
       }).catch(() => { if (!controller.signal.aborted) setStatus('unavailable'); });

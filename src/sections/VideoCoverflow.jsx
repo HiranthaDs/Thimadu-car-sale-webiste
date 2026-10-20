@@ -17,6 +17,10 @@ function previewSource(story) {
   url.searchParams.set('muted', '1');
   url.searchParams.set('playsinline', '1');
   url.searchParams.set('controls', '0');
+  // YouTube honors `end`; other hosts are stopped when their preview timer expires.
+  if (url.hostname.includes('youtube')) {
+    url.searchParams.set('end', '20');
+  }
   return { kind: 'embed', src: url.href };
 }
 
@@ -24,6 +28,8 @@ export default function VideoCoverflow({ stories }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [moving, setMoving] = useState(false);
   const [previewState, setPreviewState] = useState('idle');
+  const [previewStarted, setPreviewStarted] = useState(false);
+  const [warmedIndexes, setWarmedIndexes] = useState(() => new Set());
   const [stageWidth, setStageWidth] = useState(0);
   const [inView, setInView] = useState(false);
   const [pageVisible, setPageVisible] = useState(() => !document.hidden);
@@ -50,13 +56,31 @@ export default function VideoCoverflow({ stories }) {
       video.pause();
       try { video.currentTime = 0; } catch { /* The media may not have loaded yet. */ }
     }
+    setPreviewStarted(false);
     setPreviewState('idle');
+  }, []);
+
+  const startPreviewTimer = useCallback(() => {
+    window.clearTimeout(stopTimer.current);
+    setPreviewStarted(true);
+    stopTimer.current = window.setTimeout(() => {
+      videoRef.current?.pause();
+      setPreviewState('complete');
+    }, PREVIEW_MS);
   }, []);
 
   const moveTo = useCallback(next => {
     if (next < 0 || next >= slides.length || next === activeIndex) return;
     window.clearTimeout(moveTimer.current);
     clearPlayback();
+    // Retain already warmed media so revisiting a story does not fetch it
+    // again. Add the upcoming three-story range; in normal one-step browsing
+    // this introduces exactly one new video per move.
+    setWarmedIndexes(current => {
+      const updated = new Set(current);
+      for (let index = next; index < Math.min(next + 3, slides.length); index += 1) updated.add(index);
+      return updated;
+    });
     setMoving(true);
     setActiveIndex(next);
     moveTimer.current = window.setTimeout(() => setMoving(false), TRANSITION_MS);
@@ -72,6 +96,17 @@ export default function VideoCoverflow({ stories }) {
     visibility.observe(node);
     return () => { resize.disconnect(); visibility.disconnect(); };
   }, []);
+
+  useEffect(() => {
+    if (!inView || !pageVisible) return;
+    setWarmedIndexes(current => {
+      const updated = new Set(current);
+      for (let index = 0; index < Math.min(3, slides.length); index += 1) updated.add(index);
+      for (let index = activeIndex; index < Math.min(activeIndex + 3, slides.length); index += 1) updated.add(index);
+      if (updated.size === current.size) return current;
+      return updated;
+    });
+  }, [inView, pageVisible, activeIndex, slides.length]);
 
   useEffect(() => {
     const update = () => setPageVisible(!document.hidden);
@@ -93,13 +128,6 @@ export default function VideoCoverflow({ stories }) {
     }
     const startTimer = window.setTimeout(() => {
       setPreviewState(active.preview.kind === 'unsupported' ? 'unavailable' : 'playing');
-      if (active.preview.kind !== 'unsupported') {
-        stopTimer.current = window.setTimeout(() => {
-          const currentVideo = videoRef.current;
-          if (currentVideo) currentVideo.pause();
-          setPreviewState('complete');
-        }, PREVIEW_MS);
-      }
     }, 0);
     return () => { window.clearTimeout(startTimer); window.clearTimeout(stopTimer.current); };
   }, [activeIndex, active, moving, inView, pageVisible, reducedMotion, clearPlayback]);
@@ -147,9 +175,23 @@ export default function VideoCoverflow({ stories }) {
   const gap = Math.min(stageWidth * .31, 390);
   const activeStory = active?.story;
   const fullVideoUrl = activeStory?.videoUrl;
+  // Keep a rolling forward buffer. Direct files fetch lightweight metadata
+  // ahead of time; third-party players wait until selected so hidden iframes
+  // do not compete with the active preview or the rest of the page.
+  const preloadIndexes = [...warmedIndexes].filter(index => index > activeIndex && index < slides.length);
 
   return <div className="video-coverflow">
     <div className="video-coverflow-stage" ref={stageRef} role="region" aria-label="Customer video stories. Use arrow keys or swipe to browse." tabIndex={0} onKeyDown={onKeyDown} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointer.current = null; }}>
+      <div className="video-coverflow-preloads" aria-hidden="true">
+        {preloadIndexes.map(index => {
+          const { story, preview, poster } = slides[index];
+          const key = story.key || story.id || story.videoUrl;
+          return <span key={key}>
+            {poster && <img src={poster} alt="" loading="eager" />}
+            {preview.kind === 'video' && <video src={preview.src} poster={poster || undefined} preload="metadata" muted playsInline tabIndex={-1} />}
+          </span>;
+        })}
+      </div>
       {slides.map(({ story, preview, poster }, index) => {
         const offset = index - activeIndex;
         if (Math.abs(offset) > 2) return null;
@@ -168,12 +210,13 @@ export default function VideoCoverflow({ stories }) {
         return <article className={`video-coverflow-card${isActive ? ' is-active' : ''}`} style={cardStyle} key={story.key || story.id || story.videoUrl} aria-current={isActive ? 'true' : undefined}>
           <div className="video-coverflow-media">
             {poster && <img className="video-coverflow-poster" src={poster} alt="" loading={distance > 0 ? 'lazy' : 'eager'} />}
-            {isPlaying && preview.kind === 'video' && <video ref={videoRef} src={preview.src} poster={poster || undefined} autoPlay muted playsInline preload="auto" aria-label={`${story.title} video preview`} onLoadedData={event => { const video = event.currentTarget; if (video.dataset.previewStarted) return; video.dataset.previewStarted = 'true'; video.currentTime = 0; video.play().catch(() => setPreviewState('blocked')); }} onTimeUpdate={event => { if (event.currentTarget.currentTime >= 20) { event.currentTarget.pause(); setPreviewState('complete'); } }} onEnded={() => setPreviewState('complete')} onError={() => setPreviewState('unavailable')} />}
-            {isPlaying && preview.kind === 'embed' && <iframe src={preview.src} title={`${story.title} video preview`} allow="autoplay; encrypted-media; picture-in-picture" referrerPolicy="no-referrer" onError={() => setPreviewState('unavailable')} />}
+            {isPlaying && preview.kind === 'video' && <video ref={videoRef} src={preview.src} poster={poster || undefined} autoPlay muted playsInline preload="auto" aria-label={`${story.title} video preview`} onLoadedData={event => { const video = event.currentTarget; if (video.dataset.previewStarted) return; video.dataset.previewStarted = 'true'; video.currentTime = 0; video.play().catch(() => setPreviewState('blocked')); }} onPlay={startPreviewTimer} onEnded={() => { window.clearTimeout(stopTimer.current); setPreviewState('complete'); }} onError={() => setPreviewState('unavailable')} />}
+            {isPlaying && preview.kind === 'embed' && <iframe className={previewStarted ? '' : 'is-loading'} src={preview.src} title={`${story.title} video preview`} allow="autoplay; encrypted-media; picture-in-picture" referrerPolicy="no-referrer" onLoad={startPreviewTimer} onError={() => setPreviewState('unavailable')} />}
             {isActive && <>
-              <span className="video-coverflow-label">{previewState === 'playing' ? '20 SEC PREVIEW' : 'CUSTOMER STORY'}</span>
-              {previewState === 'playing' && <span className="video-coverflow-progress" aria-hidden="true"><i /></span>}
-              {previewState === 'complete' && <div className="video-coverflow-ended"><span className="video-coverflow-play"><Icon name="play" /></span><span>Watch full video</span></div>}
+              <span className="video-coverflow-label">{previewState === 'playing' ? '20S PREVIEW' : 'CUSTOMER STORY'}</span>
+              {previewState === 'playing' && previewStarted && <span className="video-coverflow-progress" aria-hidden="true"><i /></span>}
+              {previewState !== 'complete' && previewState !== 'blocked' && previewState !== 'unavailable' && !previewStarted && <span className="video-coverflow-play-cue" aria-hidden="true"><i><Icon name="play" /></i><small>PREVIEW STARTS AUTOMATICALLY</small></span>}
+              {previewState === 'complete' && <div className="video-coverflow-ended"><span className="video-coverflow-play"><Icon name="play" /></span><span>Watch Full Video</span></div>}
               {(previewState === 'unavailable' || previewState === 'blocked') && <div className="video-coverflow-ended"><span>Preview unavailable</span><span>Watch full video</span></div>}
               <button className="video-coverflow-hit" type="button" aria-label={previewState === 'playing' ? `Open full video: ${story.title}` : `Watch full video: ${story.title}`} onClick={() => { if (!dragged.current) openFull(story); }} />
             </>}
@@ -187,6 +230,6 @@ export default function VideoCoverflow({ stories }) {
       <div className="video-coverflow-count" aria-live="polite"><span>{String(activeIndex + 1).padStart(2, '0')}</span><i />{String(slides.length).padStart(2, '0')}</div>
       <p className="video-coverflow-hint">DRAG OR SWIPE TO EXPLORE</p>
     </div>
-    {fullVideoUrl && <p className="video-coverflow-caption">Preview plays muted for up to 20 seconds. Select the centered story to open the full video.</p>}
+    {fullVideoUrl && <p className="video-coverflow-caption">The centered story previews up to 20 seconds. Select it to watch the full video.</p>}
   </div>;
 }

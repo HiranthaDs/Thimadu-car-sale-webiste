@@ -182,6 +182,25 @@ async function fetchCollection(kind, gid, signal) {
   }
 }
 
+function keyedStoryRecords(rows, kind) {
+  const seen = new Set();
+  return normalize(rows, kind).filter((record) => {
+    const key = `${record.kind}:${record.id || [record.title, record.imageUrl, record.videoUrl, record.postedDate].join('|')}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    record.key = key;
+    return true;
+  }).sort((a, b) => a.order - b.order);
+}
+
+export async function loadCustomerStories(signal) {
+  return keyedStoryRecords(await fetchCollection('customers', CUSTOMER_GID, signal), 'photo');
+}
+
+export async function loadVideoStories(signal) {
+  return keyedStoryRecords(await fetchCollection('videos', VIDEO_GID, signal), 'video');
+}
+
 export async function loadStories(signal, { withStatus = false } = {}) {
   // Prefer the live admin API and fall back to the published sheet only when
   // the API is unavailable or has no published stories yet.
@@ -411,8 +430,8 @@ export default function ReviewsPage() {
         <Reveal><div className="reviews-intro"><div><p className="reviews-eyebrow">REAL PEOPLE. REAL MOMENTS.</p><h2 id="reviews-heading">Every journey<br />starts with a <em>smile.</em></h2></div><p>First cars, family upgrades and new adventures. Explore customer deliveries and stories from our community.</p></div></Reveal>
         <div className="reviews-toolbar">
           <div className="reviews-tabs" role="group" aria-label="Story type">{[['all', 'All stories'], ['photos', 'Photos'], ['videos', 'Videos']].map(([value, label]) => <button type="button" key={value} className={tab === value ? 'is-active' : ''} aria-pressed={tab === value} onClick={() => setTab(value)}>{label}</button>)}</div>
-          <div className="reviews-search"><Icon name="search" /><input aria-label="Search customer stories" type="search" placeholder="Search stories…" value={query} onChange={(event) => setQuery(event.target.value)} />{query && <button type="button" aria-label="Clear search" onClick={() => setQuery('')}><Icon name="close" /></button>}</div>
-          <label className="reviews-sort"><span className="reviews-visually-hidden">Sort stories</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="order">Featured order</option><option value="title">Title A–Z</option></select><Icon name="chevron" /></label>
+          <div className="reviews-search"><Icon name="search" /><input id="reviews-search" name="q" aria-label="Search customer stories" type="search" placeholder="Search stories…" value={query} onChange={(event) => setQuery(event.target.value)} />{query && <button type="button" aria-label="Clear search" onClick={() => setQuery('')}><Icon name="close" /></button>}</div>
+          <label className="reviews-sort"><span className="reviews-visually-hidden">Sort stories</span><select id="reviews-sort" name="sort" value={sort} onChange={(event) => setSort(event.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="order">Featured order</option><option value="title">Title A–Z</option></select><Icon name="chevron" /></label>
         </div>
         <div className="reviews-result-line" role="status" aria-live="polite"><span>{status === 'loading' ? 'Finding the latest moments…' : status === 'error' ? 'Stories are temporarily unavailable' : `${filtered.length.toLocaleString()} ${filtered.length === 1 ? 'story' : 'stories'}${query.trim() ? ` matching “${query.trim()}”` : ' to explore'}`}</span>{status === 'ready' && <span className="reviews-published"><span />Published customer stories</span>}</div>
         {!!unavailable.length && <p className="reviews-partial-notice" role="status">{unavailable.join(' and ')} are temporarily unavailable. Available collections are shown below. <button type="button" onClick={() => setAttempt(value => value + 1)}>Try loading again</button></p>}
