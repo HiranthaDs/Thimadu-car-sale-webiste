@@ -44,8 +44,8 @@ export function imageCandidates(value, size = 1000) {
   if (!src) return [];
   const { drive } = mediaIds(src);
   return drive ? [
-    `https://drive.google.com/thumbnail?id=${encodeURIComponent(drive)}&sz=w${size}`,
     `https://lh3.googleusercontent.com/d/${encodeURIComponent(drive)}=w${size}`,
+    `https://drive.google.com/thumbnail?id=${encodeURIComponent(drive)}&sz=w${size}`,
     src,
   ] : [src];
 }
@@ -66,6 +66,9 @@ function playerUrl(value) {
   if (vimeo) return `https://player.vimeo.com/video/${vimeo}`;
   return '';
 }
+
+export const getVideoPreviewUrl = playerUrl;
+export const getStoryThumbnail = thumbnail;
 
 function dateValue(value) {
   const text = clean(value);
@@ -161,12 +164,30 @@ async function fetchApi(kind, signal) {
   }
 }
 
+async function fetchCollection(kind, gid, signal) {
+  // The Apps Script endpoint is the live source the admin writes to. Prefer it
+  // so an older, published Sheets feed cannot win just because it responds first.
+  try {
+    const apiRows = await fetchApi(kind, signal);
+    if (apiRows.length) return apiRows;
+    try {
+      const sheetRows = await fetchSheet(gid, signal);
+      return sheetRows.length ? sheetRows : apiRows;
+    } catch {
+      return apiRows;
+    }
+  } catch (apiError) {
+    if (signal.aborted) throw apiError;
+    return fetchSheet(gid, signal);
+  }
+}
+
 export async function loadStories(signal, { withStatus = false } = {}) {
-  // Try the public sheet feed and Apps Script endpoint together so a slow feed
-  // cannot hold the gallery open while another source is already available.
+  // Prefer the live admin API and fall back to the published sheet only when
+  // the API is unavailable or has no published stories yet.
   const collections = await Promise.all([
-    Promise.any([fetchSheet(CUSTOMER_GID, signal), fetchApi('customers', signal)]).then(value => ({ status: 'fulfilled', value }), reason => ({ status: 'rejected', reason })),
-    Promise.any([fetchSheet(VIDEO_GID, signal), fetchApi('videos', signal)]).then(value => ({ status: 'fulfilled', value }), reason => ({ status: 'rejected', reason })),
+    fetchCollection('customers', CUSTOMER_GID, signal).then(value => ({ status: 'fulfilled', value }), reason => ({ status: 'rejected', reason })),
+    fetchCollection('videos', VIDEO_GID, signal).then(value => ({ status: 'fulfilled', value }), reason => ({ status: 'rejected', reason })),
   ]);
   if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
   if (collections.every(result => result.status === 'rejected')) throw new Error('The story collections could not be reached.');
@@ -180,6 +201,9 @@ export async function loadStories(signal, { withStatus = false } = {}) {
     record.key = key;
     return true;
   });
+  // The admin's display_order field controls the order used by the home page
+  // photo sphere and the video carousel, regardless of which feed responded first.
+  records.sort((a, b) => a.kind.localeCompare(b.kind) || a.order - b.order);
   return withStatus ? { records, unavailable } : records;
 }
 

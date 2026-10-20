@@ -167,6 +167,7 @@ const InfiniteMenu = ({
   intro = true,
   showInfo = true,
   renderInfo,
+  onInteractionChange,
   theme = 'dark',
   accentColor,
   backgroundColor,
@@ -199,8 +200,8 @@ const InfiniteMenu = ({
   settingsRef.current = settings;
   const itemsRef = useRef(items);
   itemsRef.current = items;
-  const callbacksRef = useRef({ onActiveChange, onItemClick });
-  callbacksRef.current = { onActiveChange, onItemClick };
+  const callbacksRef = useRef({ onActiveChange, onItemClick, onInteractionChange });
+  callbacksRef.current = { onActiveChange, onItemClick, onInteractionChange };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -701,6 +702,7 @@ const InfiniteMenu = ({
       drag.moved = 0;
       drag.start = performance.now();
       state.target = -1;
+      callbacksRef.current.onInteractionChange?.(true);
       wake();
     };
 
@@ -720,6 +722,7 @@ const InfiniteMenu = ({
       if (!drag.active || event.pointerId !== drag.id) return;
       drag.active = false;
       canvas.releasePointerCapture?.(event.pointerId);
+      callbacksRef.current.onInteractionChange?.(false);
       if (drag.moved < 6 && performance.now() - drag.start < 450) {
         const index = pick(event.clientX, event.clientY);
         if (index >= 0 && index === state.front) activate(index);
