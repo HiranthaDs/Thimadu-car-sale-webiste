@@ -26,7 +26,7 @@ export function useSeo({title, description, noindex = false, schema, image}) {
     document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach(node=>node.href=canonical.href);
     let node = document.querySelector('#site-schema');
     if(!node){node=document.createElement('script');node.id='site-schema';node.type='application/ld+json';document.head.append(node);}
-    const data = [ {'@context':'https://schema.org','@type':'AutoDealer','@id':new URL('/#dealer',location.origin).href,name:'Thimadu Auto Traders',url:location.origin,telephone:'+94771813928',image:new URL('/logo.png',location.origin).href,areaServed:'Sri Lanka',sameAs:['https://www.facebook.com/thimaducar']} ];
+    const data = [ {'@context':'https://schema.org','@type':'AutoDealer','@id':new URL('/#dealer',location.origin).href,name:'Thimadu Auto Traders',legalName:'Thimadu Auto Trading (Private) Limited',url:location.origin,telephone:'+94771813928',email:'thimadupvt@gmail.com',image:new URL('/logo.png',location.origin).href,address:{'@type':'PostalAddress',streetAddress:'43/1 C, Thihariya',addressLocality:'Kalagedihena',addressCountry:'LK'},areaServed:{'@type':'Country',name:'Sri Lanka'},knowsAbout:['Vehicle buying and selling','Imported vehicle sales','Vehicle sourcing','Vehicle inspection and technical assurance','Vehicle documentation','Pre-owned vehicle warranties','Vehicle delivery','Vehicle leasing and insurance assistance'],sameAs:['https://www.facebook.com/thimaducar']} ];
     const pageSchema = schemaJson ? JSON.parse(schemaJson) : null;
     const schemaEntries = pageSchema ? [pageSchema, ...(pageSchema['@graph'] || [])] : [];
     const hasBreadcrumbs = schemaEntries.some(item => [item['@type']].flat().includes('BreadcrumbList'));

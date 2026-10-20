@@ -4,10 +4,17 @@ import { useSeo } from '../seo';
 import './info.css';
 
 const services = [
-  { no: '01', icon: 'car', title: 'Find your next vehicle.', description: 'A new chapter starts with the right car. Explore our current collection, compare the details, and get to know the exact vehicle.', to: '/all-vehicles.html', label: 'Explore vehicles', tag: 'BUY A VEHICLE' },
-  { no: '02', icon: 'key', title: 'Ready for something new?', description: 'Let’s talk about selling your current vehicle. Share the details, a few current photographs, and what you have in mind.', to: '/sell-your-vehicle-sri-lanka.html', label: 'Sell your vehicle', tag: 'SELL YOUR VEHICLE' },
-  { no: '03', icon: 'search', title: 'Your wish list. Our next conversation.', description: 'Have a particular model in mind? Tell us what you are looking for, your budget, and the features that matter to you.', to: '/vehicle-sourcing-sri-lanka.html', label: 'Find a specific vehicle', tag: 'VEHICLE SOURCING' },
-  { no: '04', icon: 'chat', title: 'A little more clarity.', description: 'From equipment and condition to available supporting records, ask the questions that help you take the next step.', to: '/vehicle-information-support.html', label: 'Ask about a vehicle', tag: 'VEHICLE SUPPORT' },
+  { no: '01', icon: 'car', title: 'Vehicle buying, selling & imports.', description: 'Explore brand-new, pre-owned and imported vehicles, or tell us about the vehicle you are ready to sell. We support customers in Sri Lanka and overseas.', to: '/all-vehicles.html', label: 'Browse vehicles', tag: 'BUY, SELL & IMPORT' },
+  { no: '02', icon: 'key', title: 'Ready for something new?', description: 'Share your vehicle details, current photographs and expectations. We will review the information with you and discuss the next step.', to: '/sell-your-vehicle-sri-lanka.html', label: 'Sell your vehicle', tag: 'SELL YOUR VEHICLE' },
+  { no: '03', icon: 'search', title: 'Your wish list. Our next conversation.', description: 'Request a specific make or model, share your budget and the features that matter, and let us discuss suitable possibilities.', to: '/vehicle-sourcing-sri-lanka.html', label: 'Find a specific vehicle', tag: 'VEHICLE SOURCING' },
+  { no: '04', icon: 'check', title: 'Professional vehicle inspection.', description: 'Vehicles undergo comprehensive checks with experienced, qualified technical engineers to assess mechanical condition, performance, safety and reliability.', to: '/vehicle-information-support.html', label: 'Ask about an inspection', tag: 'TECHNICAL ASSURANCE' },
+  { no: '05', icon: 'chat', title: 'Clear reports. Complete documents.', description: 'At delivery, customers receive diagnostic scan reports, comprehensive inspection reports and the necessary vehicle-related documents for their purchase.', to: '/vehicle-information-support.html', label: 'Ask about vehicle records', tag: 'DOCUMENTATION & TRANSPARENCY' },
+  { no: '06', icon: 'shield', title: 'Pre-owned vehicle warranty.', description: 'We take responsibility for the warranty obligations agreed for each pre-owned vehicle and handle them promptly according to the agreed terms.', to: '/vehicle-information-support.html', label: 'Ask about warranty terms', tag: 'WARRANTY SUPPORT' },
+  { no: '07', icon: 'pin', title: 'Complimentary vehicle delivery.', description: 'Request delivery to your preferred location. Delivery is offered without an additional delivery charge, subject to confirming the arrangements.', to: '/vehicle-information-support.html', label: 'Ask about delivery', tag: 'DELIVERY' },
+  { no: '08', icon: 'key', title: 'A surprise vehicle handover.', description: 'Arrange a memorable vehicle surprise for a birthday, anniversary or celebration. Thimadu reports more than 100 arrangements across 13 years of service, with no extra arrangement charge.', to: '/vehicle-information-support.html', label: 'Plan a surprise', tag: 'COMPLIMENTARY SURPRISE ARRANGEMENTS' },
+  { no: '09', icon: 'chat', title: 'Leasing and insurance assistance.', description: 'We coordinate with leasing companies, financial institutions and insurance providers to help you explore suitable facilities.', to: '/vehicle-information-support.html', label: 'Discuss your options', tag: 'LEASING & INSURANCE' },
+  { no: '10', icon: 'pin', title: 'Leasing documents at your doorstep.', description: 'Where available, leasing officers can visit customers and guarantors at home to assist with paperwork. Requirements and approval are set by the financial institution.', to: '/vehicle-information-support.html', label: 'Ask about doorstep support', tag: 'DOORSTEP DOCUMENTATION' },
+  { no: '11', icon: 'chat', title: 'Personal support, near or far.', description: 'Local and overseas customers can receive guidance and clear communication through the vehicle-purchasing process.', to: '/vehicle-sourcing-sri-lanka.html', label: 'Start a conversation', tag: 'LOCAL & OVERSEAS CUSTOMERS' },
 ];
 
 const serviceData = {
@@ -143,14 +150,14 @@ function ServiceForm({ data, kind }) {
 }
 
 export function AboutPage() {
-  useSeo({ title: 'About Thimadu Auto Traders | Vehicle Services in Sri Lanka', description: 'Get to know Thimadu Auto Traders. Vehicle buying, selling, specific-model sourcing and direct vehicle information support in Sri Lanka.' });
+  useSeo({ title: 'About Thimadu Auto Traders | Vehicle Services in Sri Lanka', description: 'Get to know Thimadu Auto Trading (Private) Limited. Vehicle buying, selling, sourcing and customer services in Sri Lanka.' });
   return <>
     <PageHero eyebrow="A LITTLE ABOUT THIMADU" title={<>Good journeys.<br /><em>Begin together.</em></>} description="A vehicle is more than a way to get somewhere. It is the start of what comes next. We’re here to help you take that next step.">
       <div className="button-row"><Button to="/all-vehicles.html">Explore our vehicles <Icon name="arrow" /></Button>
       <Button href="https://wa.me/94771813928" variant="outline">Let’s talk <Icon name="chat" /></Button></div>
     </PageHero>
     <section className="about-image-section"><div className="container"><Reveal><figure className="about-image"><img src="/images/journey.webp" alt="A refined vehicle interior overlooking a coastal road" width="1440" height="900" fetchPriority="high" /><figcaption><span>THIMADU AUTO TRADERS</span><strong>For the road<br />ahead.</strong><Icon name="arrow-up" /></figcaption></figure></Reveal></div></section>
-    <section className="section"><div className="container about-intro-grid"><Reveal><p className="eyebrow">YOUR JOURNEY, OUR CONVERSATION</p><h2 className="section-title">A clearer way<br />to <em>move forward.</em></h2></Reveal><Reveal><div className="about-intro-copy"><p>Buying a vehicle comes with plenty of questions. Selling one does too. At Thimadu Auto Traders, we bring useful information and direct conversation together, so your next step feels clearer.</p><p>Explore our current stock, get to know the exact vehicle, and ask about what matters to you. Looking for something specific? Share your wish list. Ready for a change? Tell us about the vehicle you want to sell.</p><p>From a first search to a focused conversation, it all starts right here in Sri Lanka.</p><Link className="info-text-link" to="/services.html">Discover how we can help <Icon name="arrow" /></Link></div></Reveal></div></section>
+    <section className="section"><div className="container about-intro-grid"><Reveal><p className="eyebrow">YOUR JOURNEY, OUR CONVERSATION</p><h2 className="section-title">A clearer way<br />to <em>move forward.</em></h2></Reveal><Reveal><div className="about-intro-copy"><p>Thimadu Auto Trading (Private) Limited, known as Thimadu Auto Traders, helps customers buy, sell and source vehicles with personal guidance and clear information.</p><p>We support local and overseas customers with brand-new, pre-owned and imported vehicles, along with inspections, documentation, delivery and finance coordination. The company reports more than 100 vehicle surprise arrangements over 13 years of service.</p><p>Explore our current stock, get to know the exact vehicle, and ask about what matters to you. Looking for something specific? Share your wish list. Ready for a change? Tell us about the vehicle you want to sell.</p><Link className="info-text-link" to="/services.html">Discover how we can help <Icon name="arrow" /></Link></div></Reveal></div></section>
     <section className="section about-values"><div className="container"><Reveal><p className="eyebrow">WHAT MATTERS TO US</p><h2 className="section-title">Less guesswork.<br /><em>More understanding.</em></h2></Reveal><div className="about-value-grid">{[
       ['01', 'The exact vehicle.', 'Every listing brings its own photographs, specifications and reference. A clear starting point for a conversation about the car you are actually considering.', 'car'],
       ['02', 'A real conversation.', 'Talk directly to the vehicle desk. Share your shortlist, tell us your priorities and ask the questions that make a difference to you.', 'chat'],
@@ -162,13 +169,14 @@ export function AboutPage() {
       ['What should I include in a vehicle enquiry?', 'Share the stock ID or vehicle-page link, followed by your questions about current availability, price, equipment, condition or supporting records.'],
       ['Can I request something that is not currently listed?', 'Yes. Share your preferred make, model, year range, approximate budget and any must-have requirements through our sourcing enquiry.'],
       ['What is the best way to get in touch?', 'Message the vehicle desk on WhatsApp or call +94 77 181 3928. Include your stock reference or requirements so the team has the right context.'],
+      ['Where is Thimadu Auto Traders based?', 'The registered office address is 43/1 C, Thihariya, Kalagedihena. Email thimadupvt@gmail.com or call +94 77 181 3928.'],
     ]} />
     <ContactBanner />
   </>;
 }
 
 export function ServicesPage() {
-  useSeo({ title: 'Vehicle Buying, Selling & Sourcing Services | Thimadu Auto Traders', description: 'Buy, sell or request a specific vehicle with Thimadu Auto Traders in Sri Lanka. Explore vehicle sourcing and information support.' });
+  useSeo({ title: 'Vehicle Buying, Selling & Customer Services | Thimadu Auto Traders', description: 'Explore vehicle sales, sourcing, inspections, warranty, delivery, leasing and insurance assistance from Thimadu Auto Traders in Sri Lanka.' });
   return <>
     <PageHero eyebrow="HERE FOR YOUR NEXT MOVE" title={<>Every journey.<br /><em>A way forward.</em></>} description="Buying, selling, or searching for something specific. Let’s make your next vehicle conversation a little simpler."><div className="button-row"><Button href="#our-services">Explore our services <Icon name="arrow" /></Button></div></PageHero>
     <section className="section info-services-section" id="our-services"><div className="container">{services.map(service => <Reveal key={service.no}><Link className="info-service-row" to={service.to}><div className="info-service-number">{service.no}<span className="info-service-icon"><Icon name={service.icon} /></span></div><div className="info-service-main"><p className="eyebrow">{service.tag}</p><h2>{service.title}</h2></div><div className="info-service-detail"><p>{service.description}</p><span className="info-service-link">{service.label}<span className="info-service-arrow"><Icon name="arrow-up" /></span></span></div></Link></Reveal>)}</div></section>
@@ -182,6 +190,9 @@ export function ServicesPage() {
       ['Can I talk to someone before making a request?', 'Of course. Call +94 77 181 3928 or message the vehicle desk on WhatsApp to start a direct conversation.'],
       ['Can you help with a specific model?', 'Start a sourcing enquiry with your preferred make and model, year range, approximate budget and requirements. Any potential match is confirmed directly.'],
       ['Should I confirm an online price and status?', 'Yes. The catalogue is a useful starting point. Confirm current availability, price and any decision-critical details directly with the vehicle desk.'],
+      ['Do you assist overseas customers?', 'Yes. Thimadu provides personalized guidance and communication to local and overseas customers during the vehicle-purchasing process. Contact the team to discuss your requirements.'],
+      ['How does the pre-owned vehicle warranty work?', 'Warranty coverage and obligations follow the terms agreed for the specific vehicle. Contact the team for the applicable terms before purchase.'],
+      ['Can delivery and leasing documents be arranged at home?', 'Complimentary delivery can be requested subject to confirming arrangements. Doorstep leasing documentation depends on the relevant financial institution, its requirements and approval.'],
     ]} />
     <ContactBanner />
   </>;
