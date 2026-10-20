@@ -72,6 +72,10 @@ export function CustomerStories() {
         <p>New keys. New beginnings.<br />There is a person behind every journey.</p>
         <p>Discover the deliveries and moments shared by the Thimadu community.</p>
         <Link className="ex-inline-link" to="/reviews.html">Meet our customers <Icon name="arrow" size={18} /></Link>
+        <div className="ex-stories-media-links" aria-label="Browse customer delivery media">
+          <Link to="/reviews.html?tab=photos">Delivery photos <Icon name="arrow-up" size={14} /></Link>
+          <Link to="/reviews.html?tab=videos">Delivery videos <Icon name="arrow-up" size={14} /></Link>
+        </div>
       </Reveal>
       <Reveal className="ex-stories-stage" delay={100} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setPaused(true)}>
         <div className="ex-story-stack" aria-live={paused || hovered ? 'polite' : 'off'} aria-atomic="true" onPointerDown={event => { if (event.target.closest('a,button') || stories.length < 2) return; dragStart.current = event.clientX; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerUp={event => { if (dragStart.current === null) return; const distance = event.clientX - dragStart.current; dragStart.current = null; if (Math.abs(distance) > event.currentTarget.offsetWidth * .18) changeStory(distance > 0 ? -1 : 1); }} onPointerCancel={() => { dragStart.current = null; }}>
@@ -79,6 +83,11 @@ export function CustomerStories() {
           <div className="ex-story-layer ex-story-layer-mid" aria-hidden="true"><span /><span /><span /></div>
           <article key={story?.key || 'welcome'} className={`ex-story-card ${!story ? 'ex-story-card-welcome' : ''}`}>
             {story ? <>
+              {portrait && <Link className="ex-story-feature-media" to={`/reviews.html?tab=${story.kind === 'video' ? 'videos' : 'photos'}`} aria-label={`View ${story.kind === 'video' ? 'delivery video' : 'delivery photo'}: ${story.title}`}>
+                <img src={portrait} alt={`Customer delivery: ${story.title}`} loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.closest('.ex-story-feature-media').hidden = true; }} />
+                {story.kind === 'video' && <span className="ex-story-feature-play"><Icon name="play" size={17} /></span>}
+                <span className="ex-story-feature-label">{story.kind === 'video' ? 'Watch delivery video' : 'Customer delivery photo'}</span>
+              </Link>}
               <div className="ex-story-topline"><span>From our community</span><Icon name={story.kind === 'video' ? 'play' : 'chat'} size={23} /></div>
               <h3>{story.title}</h3>
               {story.description && <p className="ex-story-description">{story.description}</p>}

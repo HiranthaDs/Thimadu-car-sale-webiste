@@ -7,7 +7,7 @@ import './reviews.css';
 const SHEET_ID = '1kyJXiH67w19sgt5sqeDeiqytXUVMlqAsrEKKJwRaue0';
 const CUSTOMER_GID = '1902933500';
 const VIDEO_GID = '1018172779';
-const API = 'https://script.google.com/macros/s/AKfycbzh9gqz8J6qWbiqW0-N1gZMzM66TD7sQ4QHsmDBL7Osml99CEnUPC3LFLnAHCBN2mvSXg/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzua3u-DZejQpn5fEBVi9v2qatu1du6F2pIU-s2eF9NyhJVKcIgO8foP8SFnZ1XygEOpg/exec';
 const PAGE_SIZE = 12;
 const clean = (value) => String(value ?? '').trim();
 
@@ -39,7 +39,7 @@ function mediaIds(value) {
   return {};
 }
 
-function imageCandidates(value, size = 1000) {
+export function imageCandidates(value, size = 1000) {
   const src = safeUrl(value);
   if (!src) return [];
   const { drive } = mediaIds(src);
@@ -162,12 +162,11 @@ async function fetchApi(kind, signal) {
 }
 
 export async function loadStories(signal, { withStatus = false } = {}) {
-  const direct = await Promise.allSettled([fetchSheet(CUSTOMER_GID, signal), fetchSheet(VIDEO_GID, signal)]);
-  if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
-  // Fall back only for an unavailable collection. Successful direct reads stay authoritative.
-  const collections = await Promise.allSettled([
-    direct[0].status === 'fulfilled' ? direct[0].value : fetchApi('customers', signal),
-    direct[1].status === 'fulfilled' ? direct[1].value : fetchApi('videos', signal),
+  // Try the public sheet feed and Apps Script endpoint together so a slow feed
+  // cannot hold the gallery open while another source is already available.
+  const collections = await Promise.all([
+    Promise.any([fetchSheet(CUSTOMER_GID, signal), fetchApi('customers', signal)]).then(value => ({ status: 'fulfilled', value }), reason => ({ status: 'rejected', reason })),
+    Promise.any([fetchSheet(VIDEO_GID, signal), fetchApi('videos', signal)]).then(value => ({ status: 'fulfilled', value }), reason => ({ status: 'rejected', reason })),
   ]);
   if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
   if (collections.every(result => result.status === 'rejected')) throw new Error('The story collections could not be reached.');
@@ -192,7 +191,7 @@ function StoryImage({ src, alt, large = false }) {
   return <img src={candidates[index]} alt={alt} loading={large ? 'eager' : 'lazy'} decoding="async" referrerPolicy="no-referrer" onError={() => setIndex((previous) => previous + 1)} />;
 }
 
-function StoryDialog({ story, onClose }) {
+export function StoryDialog({ story, onClose }) {
   const ref = useRef(null);
   useEffect(() => {
     if (!story || !ref.current) return;
@@ -231,14 +230,98 @@ function StoryDialog({ story, onClose }) {
   </dialog>;
 }
 
-function StoryCard({ story, onOpen }) {
+function ScrollVideo({ story }) {
+  const ref = useRef(null);
+  const stopped = useRef(false);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    let visible = false;
+    const sync = () => {
+      if (visible && !document.hidden && !document.querySelector('dialog[open]') && !stopped.current) {
+        video.play().catch(() => {});
+      } else video.pause();
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting && entry.intersectionRatio >= .6;
+      sync();
+    }, { threshold: [0, .6] });
+    observer.observe(video);
+    let dialogOpen = !!document.querySelector('dialog[open]');
+    const dialogs = new MutationObserver(() => {
+      const next = !!document.querySelector('dialog[open]');
+      if (next !== dialogOpen) { dialogOpen = next; sync(); }
+    });
+    dialogs.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'], childList: true });
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      video.pause();
+      observer.disconnect();
+      dialogs.disconnect();
+      document.removeEventListener('visibilitychange', sync);
+    };
+  }, [failed]);
+  if (failed) return <div className="story-image-empty"><span>Preview unavailable. Open the full story below.</span></div>;
+  return <video ref={ref} src={story.videoUrl} poster={thumbnail(story) || undefined}
+    controls muted loop playsInline preload="metadata" aria-label={story.title}
+    onError={() => setFailed(true)}
+  />;
+}
+
+function ScrollEmbed({ story }) {
+  const host = useRef(null);
+  const [active, setActive] = useState(false);
+  const src = useMemo(() => {
+    const url = playerUrl(story.videoUrl);
+    if (!url) return '';
+    const target = new URL(url);
+    target.searchParams.set('autoplay', '1');
+    target.searchParams.set('mute', '1');
+    target.searchParams.set('muted', '1');
+    target.searchParams.set('playsinline', '1');
+    target.searchParams.set('loop', '1');
+    const ids = mediaIds(story.videoUrl);
+    if (ids.youtube) target.searchParams.set('playlist', ids.youtube);
+    return target.href;
+  }, [story.videoUrl]);
+  useEffect(() => {
+    const node = host.current;
+    if (!node || !src) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      const shouldPlay = entry.isIntersecting && entry.intersectionRatio >= .6 && !document.hidden && !document.querySelector('dialog[open]');
+      setActive(shouldPlay);
+    }, { threshold: [0, .6] });
+    observer.observe(node);
+    const onVisibility = () => {
+      const bounds = node.getBoundingClientRect();
+      const visibleHeight = Math.max(0, Math.min(bounds.bottom, innerHeight) - Math.max(bounds.top, 0));
+      const visibleWidth = Math.max(0, Math.min(bounds.right, innerWidth) - Math.max(bounds.left, 0));
+      const ratio = (visibleHeight * visibleWidth) / Math.max(1, bounds.width * bounds.height);
+      setActive(ratio >= .6 && !document.hidden && !document.querySelector('dialog[open]'));
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { observer.disconnect(); document.removeEventListener('visibilitychange', onVisibility); };
+  }, [src]);
+  return <div className="story-scroll-embed" ref={host}>
+    {active ? <iframe src={src} title={story.title} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="no-referrer" /> : <button type="button" className="story-scroll-embed-poster" onClick={() => setActive(true)} aria-label="Play video">
+      <StoryImage src={thumbnail(story)} alt={story.title} />
+      <span className="story-play"><Icon name="play" /></span>
+      <span>Scroll to play · muted</span>
+    </button>}
+  </div>;
+}
+
+export function StoryCard({ story, onOpen, autoPreview = false }) {
+  const directPreview = autoPreview && story.kind === 'video' && /\.(?:mp4|webm|ogg|m4v)$/i.test(new URL(story.videoUrl).pathname);
+  const embedPreview = autoPreview && story.kind === 'video' && !directPreview && !!playerUrl(story.videoUrl);
   return <article className={`story-card story-card-${story.kind}`}>
-    <button type="button" className="story-media" onClick={() => onOpen(story)} aria-label={`${story.kind === 'video' ? 'Watch' : 'View'} ${story.title}`}>
+    {directPreview ? <div className="story-media story-inline-video"><ScrollVideo story={story}/></div> : embedPreview ? <div className="story-media story-inline-video"><ScrollEmbed story={story}/></div> : <button type="button" className="story-media" onClick={() => onOpen(story)} aria-label={`${story.kind === 'video' ? 'Watch' : 'View'} ${story.title}`}>
       <StoryImage src={thumbnail(story)} alt={story.title} />
       <span className="story-badge">{story.kind === 'video' ? 'Video story' : 'Customer delivery'}</span>
       {story.kind === 'video' && <span className="story-play"><Icon name="play" /></span>}
       <span className="story-media-arrow"><Icon name="arrow-up" /></span>
-    </button>
+    </button>}
     <div className="story-copy">
       <div className="story-label-row"><span className="story-type">{story.kind === 'video' ? story.platform : 'Happy moments'}</span>{formatDate(story.postedDate) && <span className="story-date">{formatDate(story.postedDate)}</span>}</div>
       <h3><button type="button" onClick={() => onOpen(story)}>{story.title}</button></h3>

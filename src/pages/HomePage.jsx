@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon, Reveal } from '../components';
 import { FeaturedVehicles } from '../inventory';
@@ -8,6 +8,23 @@ import JourneyTimeline from '../sections/JourneyTimeline';
 import { CustomerStories, ConversationJourney, GuidesSection, FinaleSection } from '../sections/ExperienceSections';
 import SriLankaNetwork from '../sections/SriLankaNetwork';
 import './home.css';
+
+const DeliveryGallery = lazy(() => import('../sections/DeliveryGallery'));
+
+function DeferredDeliveryGallery() {
+  const slot = useRef(null);
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const element = slot.current;
+    if (!element || !('IntersectionObserver' in window)) { setActive(true); return; }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setActive(true); observer.disconnect(); }
+    }, { rootMargin: '900px 0px' });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={slot} id="delivery-gallery">{active ? <Suspense fallback={<section className="delivery-gallery delivery-gallery-loading" aria-label="Customer stories"><div className="container"><p className="eyebrow">THE THIMADU COMMUNITY</p><h2>New keys. Unforgettable moments.</h2></div></section>}><DeliveryGallery /></Suspense> : <section className="delivery-gallery delivery-gallery-loading" aria-label="Customer stories" />}</div>;
+}
 
 function VehicleSection() {
   const navigate = useNavigate();
@@ -43,5 +60,5 @@ function Questions() {
 }
 export default function HomePage() {
   useSeo({title:'Thimadu Auto Traders | Your next car. Your next chapter.',description:'Discover cars for sale in Sri Lanka, sell your vehicle, or find a specific model with personal support from Thimadu Auto Traders.'});
-  return <><HeroStory/><ConfidenceGauge/><JourneyTimeline/><CustomerStories/><ConversationJourney/><SriLankaNetwork/><VehicleSection/><GuidesSection/><Questions/><FinaleSection/></>;
+  return <><HeroStory/><ConfidenceGauge/><DeferredDeliveryGallery/><JourneyTimeline/><CustomerStories/><ConversationJourney/><SriLankaNetwork/><VehicleSection/><GuidesSection/><Questions/><FinaleSection/></>;
 }
