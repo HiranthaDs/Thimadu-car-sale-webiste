@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Icon } from '../components';
 import { imageCandidates, loadCustomerStories, loadVideoStories, StoryDialog } from '../pages/ReviewsPage';
 import InfiniteMenu from '../components/infinite-menu/InfiniteMenu';
 import VideoCoverflow from './VideoCoverflow';
@@ -23,8 +25,40 @@ function CustomerSphere({ records, onOpen }) {
   </div>;
 }
 
+function GalleryAbstractBackground() {
+  return <div className="gallery-abstract-background" aria-hidden="true">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <defs>
+        <radialGradient id="gallery-glow-top-right"><stop offset="0" stopColor="#438aff" stopOpacity=".52"/><stop offset=".5" stopColor="#83b8ff" stopOpacity=".25"/><stop offset="1" stopColor="#dceaff" stopOpacity="0"/></radialGradient>
+        <radialGradient id="gallery-glow-bottom-left"><stop offset="0" stopColor="#83b8ff" stopOpacity=".42"/><stop offset=".56" stopColor="#b7d7ff" stopOpacity=".22"/><stop offset="1" stopColor="#eaf3ff" stopOpacity="0"/></radialGradient>
+        <radialGradient id="gallery-glow-center"><stop offset="0" stopColor="#fff" stopOpacity=".98"/><stop offset=".72" stopColor="#f8fbff" stopOpacity=".78"/><stop offset="1" stopColor="#f8fbff" stopOpacity="0"/></radialGradient>
+        <linearGradient id="gallery-orbit-fill" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#b7d7ff" stopOpacity=".17"/><stop offset="1" stopColor="#438aff" stopOpacity=".06"/></linearGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#gallery-glow-center)"/>
+      <ellipse cx="1530" cy="-30" rx="560" ry="480" fill="url(#gallery-glow-top-right)"/>
+      <ellipse cx="-30" cy="950" rx="520" ry="420" fill="url(#gallery-glow-bottom-left)"/>
+      <circle cx="1160" cy="365" r="465" fill="url(#gallery-orbit-fill)"/>
+      <circle cx="1160" cy="365" r="465" fill="none" stroke="#fff" strokeOpacity=".36" strokeWidth="1.5"/>
+      <circle cx="1160" cy="365" r="565" fill="none" stroke="#fff" strokeOpacity=".25" strokeWidth="1.25"/>
+      <circle cx="1160" cy="365" r="665" fill="none" stroke="#fff" strokeOpacity=".19" strokeWidth="1"/>
+      <circle cx="1530" cy="-30" r="310" fill="#83b8ff" fillOpacity=".09"/>
+      <circle cx="1530" cy="-30" r="310" fill="none" stroke="#fff" strokeOpacity=".33" strokeWidth="1.5"/>
+      <circle cx="1530" cy="-30" r="390" fill="none" stroke="#fff" strokeOpacity=".22" strokeWidth="1.2"/>
+      <circle cx="-30" cy="950" r="285" fill="#b7d7ff" fillOpacity=".12"/>
+      <circle cx="-30" cy="950" r="285" fill="none" stroke="#fff" strokeOpacity=".38" strokeWidth="1.5"/>
+      <circle cx="-30" cy="950" r="385" fill="none" stroke="#fff" strokeOpacity=".25" strokeWidth="1.2"/>
+      <circle cx="1530" cy="940" r="390" fill="#83b8ff" fillOpacity=".07"/>
+      <circle cx="1530" cy="940" r="390" fill="none" stroke="#fff" strokeOpacity=".24" strokeWidth="1.25"/>
+    </svg>
+  </div>;
+}
+
 function MediaRow({ kind, records, loading, unavailable, onOpen }) {
   if (kind === 'video') return <div className="delivery-row delivery-row-video">
+    <header className="delivery-reels-header">
+      <div><p className="delivery-reels-eyebrow">02 / VIDEO COLLECTION</p><h3>Stories in motion.</h3><p className="delivery-reels-description">Real customers. Real journeys. Watch the moments that make every drive unforgettable.</p></div>
+      <Link className="delivery-reels-view-all" to="/reviews.html?tab=videos">View all videos <Icon name="arrow-up" size={16} /></Link>
+    </header>
     <div className="delivery-showcase-media">{loading ? <div className="delivery-video-loading" role="status" aria-label="Loading customer videos" /> : records.length ? <VideoCoverflow stories={records} /> : <div className="delivery-empty" role="status" aria-label={unavailable ? 'Customer videos are temporarily unavailable' : 'No customer videos have been published'} />}</div>
   </div>;
 
@@ -51,10 +85,16 @@ export default function DeliveryGallery() {
   }, [attempt]);
 
   return <section className="delivery-gallery" id="delivery-gallery-content" aria-labelledby="delivery-gallery-title">
-    <div className="container">
-      <header className="delivery-gallery-heading"><h2 id="delivery-gallery-title"><span>Customer</span> <span>stories</span></h2></header>
-      {(statuses.photo === 'error' || statuses.video === 'error') && <p className="delivery-notice" role="status">Some delivery moments could not be loaded. <button type="button" onClick={() => setAttempt(value => value + 1)}>Try again</button></p>}
-      {['photo', 'video'].map(kind => <MediaRow key={kind} kind={kind} records={stories[kind].filter(story => kind === 'video' || story.imageUrl)} loading={statuses[kind] === 'loading'} unavailable={statuses[kind] === 'error'} onOpen={setSelected} />)}
+    <div className="container delivery-sphere-backdrop">
+      <GalleryAbstractBackground />
+      <div className="delivery-sphere-content">
+        <header className="delivery-gallery-heading"><h2 id="delivery-gallery-title"><span>Customer</span> <span>stories</span></h2></header>
+        {(statuses.photo === 'error' || statuses.video === 'error') && <p className="delivery-notice" role="status">Some delivery moments could not be loaded. <button type="button" onClick={() => setAttempt(value => value + 1)}>Try again</button></p>}
+        <MediaRow kind="photo" records={stories.photo.filter(story => story.imageUrl)} loading={statuses.photo === 'loading'} unavailable={statuses.photo === 'error'} onOpen={setSelected} />
+      </div>
+    </div>
+    <div className="container delivery-video-content">
+      <MediaRow kind="video" records={stories.video} loading={statuses.video === 'loading'} unavailable={statuses.video === 'error'} onOpen={setSelected} />
     </div>
     <StoryDialog story={selected} onClose={() => setSelected(null)} />
   </section>;
