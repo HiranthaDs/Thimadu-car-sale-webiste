@@ -144,3 +144,15 @@
 @media(max-width:760px){.delivery-video-content{padding-bottom:12px}.delivery-photo-content{padding-bottom:72px}}
 @media(max-width:600px){.delivery-row-photo-rail{padding:20px 14px}}
 @media(max-width:480px){.delivery-video-content{padding-bottom:6px}.delivery-photo-content{padding-bottom:55px}.delivery-row-photo-rail{border-radius:22px}}
+
+/* Keep the full customer flag globe in view within a compact section. */
+.delivery-sphere-content{padding-top:38px;padding-bottom:24px}
+.delivery-gallery-heading{margin-bottom:12px}
+.delivery-gallery-heading h2{font-size:clamp(32px,3.5vw,44px)}
+.delivery-row-photo{min-height:0;padding:8px 16px}
+.delivery-sphere-stage{height:clamp(300px,32vw,420px);border-radius:20px}
+.delivery-sphere-caption{display:flex;align-items:center;justify-content:center;gap:14px;min-height:36px;color:#607ba5;font-size:11px;letter-spacing:.02em}
+.delivery-sphere-caption strong{color:#102f65;font-size:13px;font-weight:700}
+.delivery-sphere-caption span:before{content:"";display:inline-block;width:3px;height:3px;margin:0 13px 2px 0;border-radius:50%;background:#2563ff}
+@media(max-width:760px){.delivery-sphere-content{padding-top:26px;padding-bottom:18px}.delivery-gallery-heading{margin-bottom:8px}.delivery-row-photo{padding:4px 9px}.delivery-sphere-stage{height:clamp(280px,78vw,380px)}}
+@media(max-width:480px){.delivery-sphere-content{padding-top:21px;padding-bottom:14px}.delivery-gallery-heading h2{font-size:32px}.delivery-sphere-stage{height:clamp(255px,82vw,340px);border-radius:16px}.delivery-sphere-caption{gap:8px;min-height:34px;font-size:10px}.delivery-sphere-caption strong{font-size:12px}.delivery-sphere-caption span:before{margin-right:8px}}

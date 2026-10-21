@@ -1,28 +1,33 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components';
-import { imageCandidates, loadCustomerStories, loadVideoStories, StoryDialog } from '../pages/ReviewsPage';
+import { loadCustomerStories, loadVideoStories, StoryDialog } from '../pages/ReviewsPage';
 import InfiniteMenu from '../components/infinite-menu/InfiniteMenu';
 import VideoCoverflow from './VideoCoverflow';
 import PhotoStoryRail from './PhotoStoryRail';
 import './delivery-gallery.css';
 
-const SAMPLE_CUSTOMER_MOMENTS = [
-  { key: 'sample-family-drive', kind: 'photo', imageUrl: '/images/conversation-couple.webp', title: 'A new chapter begins', description: 'A first drive together in a car that feels like home.', isSample: true },
-  { key: 'sample-driver-ready', kind: 'photo', imageUrl: '/images/conversation-driver.webp', title: 'Ready for the road ahead', description: 'The confidence of finding the right vehicle.', isSample: true },
-  { key: 'sample-coastal-journey', kind: 'photo', imageUrl: '/images/coastal-journey.webp', title: 'The journey is yours', description: 'New places and good memories, one drive at a time.', isSample: true },
-  { key: 'sample-sri-lanka-drive', kind: 'photo', imageUrl: '/images/hero.webp', title: 'Made for your next journey', description: 'A little inspiration for your next chapter.', isSample: true },
+const CUSTOMER_LOCATIONS = [
+  { image: '/images/customer-flags/jordan-card.webp', title: 'Jordan', description: 'Our customers in Jordan' },
+  { image: '/images/customer-flags/israel-card.webp', title: 'Israel', description: 'Our customers in Israel' },
+  { image: '/images/customer-flags/dubai-card.webp', title: 'Dubai', description: 'United Arab Emirates' },
+  { image: '/images/customer-flags/qatar-card.webp', title: 'Qatar', description: 'Our customers in Qatar' },
+  { image: '/images/customer-flags/ajman-card.webp', title: 'Ajman', description: 'United Arab Emirates' },
+  { image: '/images/customer-flags/italy-card.webp', title: 'Italy', description: 'Our customers in Italy' },
+  { image: '/images/customer-flags/syria-card.webp', title: 'Syria', description: 'Our customers in Syria' },
+  { image: '/images/customer-flags/oman-card.webp', title: 'Oman', description: 'Our customers in Oman' },
+  { image: '/images/customer-flags/saudi-arabia-card.webp', title: 'Saudi Arabia', description: 'Our customers in Saudi Arabia' },
+  { image: '/images/customer-flags/kuwait-card.webp', title: 'Kuwait', description: 'Our customers in Kuwait' },
 ];
 
-function CustomerSphere({ records, onOpen }) {
+function CustomerSphere() {
   const [holding, setHolding] = useState(false);
-  const items = useMemo(() => records.map(story => ({
-    image: imageCandidates(story.imageUrl, 900)[0] || story.imageUrl,
-    title: story.title,
-    description: [[story.customerName, story.location].filter(Boolean).join(' · '), story.description].filter(Boolean).join('\n'),
-  })), [records]);
-  return <div className="delivery-sphere-stage" aria-label="Customer delivery photo sphere">
-    <InfiniteMenu items={items} count={96} tileSize={0.72} roundness={0.18} zoom={holding ? 0.95 : 1.55} pullBack={1} stretch={0.5} inertia={0.6} autoplay={4} grayscale={false} dim={0} intro showInfo theme="light" accentColor="#2563ff" backgroundColor="transparent" className="delivery-infinite-menu" onItemClick={(_, index) => onOpen(records[index % records.length])} onInteractionChange={setHolding} />
+  const [activeIndex, setActiveIndex] = useState(0);
+  return <div className="delivery-sphere-wrap">
+    <div className="delivery-sphere-stage" aria-label="Customer locations flag sphere">
+      <InfiniteMenu items={CUSTOMER_LOCATIONS} count={96} tileSize={0.72} roundness={0.18} zoom={holding ? 0.34 : 0.39} pullBack={0.2} stretch={0.5} inertia={0.6} autoplay={4} grayscale={false} dim={0} intro showInfo={false} theme="light" accentColor="#2563ff" backgroundColor="transparent" className="delivery-infinite-menu" onActiveChange={(_, index) => setActiveIndex(index)} onInteractionChange={setHolding} />
+    </div>
+    <div className="delivery-sphere-caption"><strong>{CUSTOMER_LOCATIONS[activeIndex]?.title}</strong><span>Drag to explore our customers</span></div>
   </div>;
 }
 
@@ -64,7 +69,7 @@ function MediaRow({ kind, records, loading, unavailable, onOpen }) {
   </div>;
 
   return <div className="delivery-row delivery-row-photo">
-    <div className="delivery-showcase-media">{loading ? <div className="delivery-sphere-loading" role="status" aria-label="Loading customer photos" /> : <CustomerSphere records={records.length ? records : SAMPLE_CUSTOMER_MOMENTS} onOpen={onOpen} />}</div>
+    <div className="delivery-showcase-media"><CustomerSphere /></div>
   </div>;
 }
 
@@ -89,7 +94,7 @@ export default function DeliveryGallery() {
     <div className="container delivery-sphere-backdrop">
       <GalleryAbstractBackground />
       <div className="delivery-sphere-content">
-        <header className="delivery-gallery-heading"><h2 id="delivery-gallery-title"><span>Customer</span> <span>stories</span></h2></header>
+        <header className="delivery-gallery-heading"><h2 id="delivery-gallery-title"><span>Our</span> <span>customers</span></h2></header>
         {(statuses.photo === 'error' || statuses.video === 'error') && <p className="delivery-notice" role="status">Some delivery moments could not be loaded. <button type="button" onClick={() => setAttempt(value => value + 1)}>Try again</button></p>}
         <MediaRow kind="photo" records={stories.photo.filter(story => story.imageUrl)} loading={statuses.photo === 'loading'} unavailable={statuses.photo === 'error'} onOpen={setSelected} />
       </div>
