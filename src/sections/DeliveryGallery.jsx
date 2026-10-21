@@ -4,6 +4,7 @@ import { Icon } from '../components';
 import { imageCandidates, loadCustomerStories, loadVideoStories, StoryDialog } from '../pages/ReviewsPage';
 import InfiniteMenu from '../components/infinite-menu/InfiniteMenu';
 import VideoCoverflow from './VideoCoverflow';
+import PhotoStoryRail from './PhotoStoryRail';
 import './delivery-gallery.css';
 
 const SAMPLE_CUSTOMER_MOMENTS = [
@@ -95,6 +96,15 @@ export default function DeliveryGallery() {
     </div>
     <div className="container delivery-video-content">
       <MediaRow kind="video" records={stories.video} loading={statuses.video === 'loading'} unavailable={statuses.video === 'error'} onOpen={setSelected} />
+    </div>
+    <div className="container delivery-photo-content">
+      <div className="delivery-row delivery-row-photo-rail">
+        <header className="delivery-reels-header">
+          <div><p className="delivery-reels-eyebrow">03 / PHOTO COLLECTION</p><h3>Moments worth keeping.</h3><p className="delivery-reels-description">Customer handovers and journeys, captured one photo at a time.</p></div>
+          <Link className="delivery-reels-view-all" to="/reviews.html?tab=photos">View all photos <Icon name="arrow-up" size={16} /></Link>
+        </header>
+        <div className="delivery-showcase-media">{statuses.photo === 'loading' ? <div className="delivery-sphere-loading" role="status" aria-label="Loading customer photos" /> : <PhotoStoryRail stories={stories.photo.filter(story => story.imageUrl)} onOpen={setSelected} />}</div>
+      </div>
     </div>
     <StoryDialog story={selected} onClose={() => setSelected(null)} />
   </section>;
