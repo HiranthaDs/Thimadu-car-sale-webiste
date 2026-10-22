@@ -60,5 +60,5 @@ function Questions() {
 }
 export default function HomePage() {
   useSeo({title:'Thimadu Auto Traders | Your next car. Your next chapter.',description:'Discover cars for sale in Sri Lanka, sell your vehicle, or find a specific model with personal support from Thimadu Auto Traders.'});
-  return <><HeroStory/><ConfidenceGauge/><DeferredDeliveryGallery/><JourneyTimeline/><CustomerStories/><ConversationJourney/><SriLankaNetwork/><VehicleSection/><GuidesSection/><Questions/><FinaleSection/></>;
+  return <><HeroStory/><ConfidenceGauge/><DeferredDeliveryGallery/><VehicleSection/><GuidesSection/><JourneyTimeline/><CustomerStories/><ConversationJourney/><SriLankaNetwork/><Questions/><FinaleSection/></>;
 }
