@@ -13,6 +13,8 @@
  * SECURITY:
  *   Set a strong, unique Script Property THIMADU_ADMIN_TOKEN in Apps Script:
  *   Project Settings -> Script Properties.
+ *   For video uploads also set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY,
+ *   and CLOUDINARY_API_SECRET as Script Properties. Never put the secret in HTML.
  *   Admin access is disabled when this property is missing or blank.
  *
  * DEPLOYMENT:
@@ -134,6 +136,9 @@ function doPost(e) {
     }
 
     requireAdmin_(payload.token);
+    if (action === "cloudinary_signature") {
+      return json_(Object.assign({ status: "success" }, cloudinarySignature_()));
+    }
     ensureDatabase_();
 
     // Admin read is read-only and should not be blocked by uploads/writes.
@@ -978,6 +983,7 @@ function cleanFileName_(name) {
 
 function detectVideoPlatform_(url) {
   const u = String(url || "").toLowerCase();
+  if (/^https:\/\/res\.cloudinary\.com\/[a-z0-9_-]+\/video\/upload\//.test(u)) return "Cloudinary";
   if (u.indexOf("youtube.com") >= 0 || u.indexOf("youtu.be") >= 0) return "YouTube";
   if (u.indexOf("facebook.com") >= 0 || u.indexOf("fb.watch") >= 0) return "Facebook";
   if (u.indexOf("tiktok.com") >= 0) return "TikTok";
@@ -987,8 +993,26 @@ function detectVideoPlatform_(url) {
 }
 
 function deriveVideoThumbnail_(url) {
+  const cloudinary = String(url || "").match(/^(https:\/\/res\.cloudinary\.com\/[a-z0-9_-]+\/video\/upload\/)(.+)$/i);
+  if (cloudinary) return cloudinary[1] + cloudinary[2].replace(/\.[^./?]+(?:\?.*)?$/, ".jpg");
   const id = extractYouTubeId_(url);
   return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : "";
+}
+
+function cloudinarySignature_() {
+  const properties = PropertiesService.getScriptProperties();
+  const cloudName = properties.getProperty("CLOUDINARY_CLOUD_NAME");
+  const apiKey = properties.getProperty("CLOUDINARY_API_KEY");
+  const apiSecret = properties.getProperty("CLOUDINARY_API_SECRET");
+  if (!cloudName || !apiKey || !apiSecret || !/^[a-zA-Z0-9_-]+$/.test(cloudName)) {
+    throw appError_("CLOUDINARY_CONFIG", "Cloudinary credentials are not configured in Script Properties.");
+  }
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = "thimadu/videos";
+  const signatureBase = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
+  const signature = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_1, signatureBase)
+    .map(byte => (byte + 256).toString(16).slice(-2)).join("");
+  return { cloudName: cloudName, apiKey: apiKey, folder: folder, timestamp: timestamp, signature: signature };
 }
 
 function extractYouTubeId_(url) {

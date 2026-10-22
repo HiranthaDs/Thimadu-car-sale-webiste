@@ -24,6 +24,7 @@ function previewSource(story) {
 
 export default function VideoCoverflow({ stories }) {
   const railRef = useRef(null);
+  const dialogRef = useRef(null);
   const cardRefs = useRef([]);
   const videoRef = useRef(null);
   const settleTimer = useRef(0);
@@ -37,6 +38,7 @@ export default function VideoCoverflow({ stories }) {
   const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [previewState, setPreviewState] = useState('idle');
   const [previewStarted, setPreviewStarted] = useState(false);
+  const [openStory, setOpenStory] = useState(null);
   const [warmedIndexes, setWarmedIndexes] = useState(() => new Set());
   const [scrollBounds, setScrollBounds] = useState({ previous: false, next: stories.length > 1 });
 
@@ -52,6 +54,7 @@ export default function VideoCoverflow({ stories }) {
   const findCenteredIndex = useCallback(() => {
     const rail = railRef.current;
     if (!rail) return 0;
+    if (rail.scrollLeft <= 2) return 0;
     const center = rail.scrollLeft + rail.clientWidth / 2;
     let closest = 0;
     let distance = Infinity;
@@ -144,9 +147,18 @@ export default function VideoCoverflow({ stories }) {
     videoRef.current?.pause();
   }, []);
 
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || !openStory) return;
+    dialog.showModal();
+    videoRef.current?.pause();
+    window.clearTimeout(previewTimer.current);
+    return () => { if (dialog.open) dialog.close(); };
+  }, [openStory]);
+
   const openFull = story => {
     if (suppressClick.current) return;
-    window.open(story.videoUrl, '_blank', 'noopener,noreferrer');
+    setOpenStory(story);
   };
 
   const onPointerDown = event => {
@@ -186,7 +198,7 @@ export default function VideoCoverflow({ stories }) {
       <div className="reels-rail" ref={railRef} role="region" aria-label="Customer video stories. Swipe, drag, or use the arrow keys to browse." tabIndex={0} onScroll={settle} onKeyDown={onKeyDown} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onPointerLeave={onPointerUp}>
         {slides.map(({ story, preview, poster }, index) => {
           const active = index === activeIndex;
-          const showPlayer = active && settled && inView && pageVisible && (previewState === 'loading' || previewState === 'playing');
+          const showPlayer = !openStory && active && settled && inView && pageVisible && (previewState === 'loading' || previewState === 'playing');
           return <article className={`reels-card${active ? ' is-active' : ''}`} key={story.key || story.id || story.videoUrl} ref={node => { cardRefs.current[index] = node; }} aria-current={active ? 'true' : undefined}>
             <div className="reels-media">
               {poster && <img className="reels-poster" src={poster} alt="" loading={index < 3 ? 'eager' : 'lazy'} />}
@@ -205,5 +217,16 @@ export default function VideoCoverflow({ stories }) {
       <button type="button" className="reels-arrow reels-arrow-prev" aria-label="Previous customer video" disabled={!scrollBounds.previous} onClick={() => scrollToIndex(Math.max(0, activeIndex - 1))}><Icon name="arrow" /></button>
       <button type="button" className="reels-arrow reels-arrow-next" aria-label="Next customer video" disabled={!scrollBounds.next} onClick={() => scrollToIndex(Math.min(slides.length - 1, activeIndex + 1))}><Icon name="arrow" /></button>
     </div>
+    {openStory && <dialog ref={dialogRef} className="reels-dialog" aria-label={`Watch full video: ${openStory.title}`} onClose={() => setOpenStory(null)} onClick={event => { if (event.target === event.currentTarget) event.currentTarget.close(); }}>
+      <div className="reels-dialog-inner">
+        <button type="button" className="reels-dialog-close" aria-label="Close video" onClick={() => dialogRef.current?.close()}><Icon name="close" /></button>
+        {/\.(?:mp4|webm|ogg|m4v)$/i.test(new URL(openStory.videoUrl).pathname)
+          ? <video src={openStory.videoUrl} poster={getStoryThumbnail(openStory) || undefined} controls autoPlay playsInline preload="metadata" />
+          : getVideoPreviewUrl(openStory.videoUrl)
+            ? <iframe src={getVideoPreviewUrl(openStory.videoUrl)} title={openStory.title} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen />
+            : <p>This video is available at <a href={openStory.videoUrl} target="_blank" rel="noopener noreferrer">its original source</a>.</p>}
+        <h3>{openStory.title}</h3>
+      </div>
+    </dialog>}
   </div>;
 }

@@ -23,10 +23,9 @@
     // Deploy -> Manage deployments -> Edit -> New version,
     // the same URL below can remain unchanged.
     const CONFIG = {
-      DEPLOY_URL: "https://script.google.com/macros/s/AKfycbzua3u-DZejQpn5fEBVi9v2qatu1du6F2pIU-s2eF9NyhJVKcIgO8foP8SFnZ1XygEOpg/exec",
+      DEPLOY_URL: "https://script.google.com/macros/s/AKfycbxNlpop6xW-D8ufDsdjIajmX9ct6vUlcan3BPcfKLPM1LNl1DLyKnLC47WdKzVgW7Z2xA/exec",
       DATABASE_URL: "https://docs.google.com/spreadsheets/d/1kyJXiH67w19sgt5sqeDeiqytXUVMlqAsrEKKJwRaue0/edit",
       PUBLIC_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQtUtkiDWGhuls-2JhfsVL1Hj_oFiFTyBPZyHndMBHeNoRotTcjppZe-tN32NqST4-t-xsgXnjYMK-8/pub?output=csv",
-      DRIVE_FOLDER_URL: "https://drive.google.com/drive/folders/1Ot4nsPI2Q9oaxsj-T_JJSM9NMvs6GIy1?usp=sharing",
       MAX_VEHICLE_IMAGES: 20,
       REQUEST_TIMEOUT_MS: 120000
     };
@@ -357,9 +356,6 @@
               <a class="flex items-center justify-between gap-3 font-semibold hover:text-thimadu" href="https://docs.google.com/spreadsheets/d/1kyJXiH67w19sgt5sqeDeiqytXUVMlqAsrEKKJwRaue0/edit" target="_blank">
                 Google Sheet <i class='bx bx-link-external'></i>
               </a>
-              <a class="flex items-center justify-between gap-3 font-semibold hover:text-thimadu" href="https://drive.google.com/drive/folders/1Ot4nsPI2Q9oaxsj-T_JJSM9NMvs6GIy1?usp=sharing" target="_blank">
-                Media Drive <i class='bx bx-link-external'></i>
-              </a>
               <a class="flex items-center justify-between gap-3 font-semibold hover:text-thimadu" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQtUtkiDWGhuls-2JhfsVL1Hj_oFiFTyBPZyHndMBHeNoRotTcjppZe-tN32NqST4-t-xsgXnjYMK-8/pub?output=csv" target="_blank">
                 Public vehicle CSV <i class='bx bx-link-external'></i>
               </a>
@@ -546,10 +542,9 @@
           <p class="text-[11px] uppercase tracking-[.14em] font-extrabold text-thimadu">Media</p>
           <h2 class="text-3xl sm:text-4xl font-extrabold tracking-[-.045em] mt-2">Videos</h2>
           <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mt-2">
-            <p class="text-sm text-slate-500 leading-6 max-w-2xl">Publish videos stored in the Thimadu Google Drive folder, or use YouTube, Facebook, TikTok, Instagram and Vimeo links. Normal Google Drive share links work directly.</p>
+            <p class="text-sm text-slate-500 leading-6 max-w-2xl">Upload videos to Cloudinary, or add a YouTube, Facebook, TikTok, Instagram or Vimeo link.</p>
             <div class="flex flex-wrap gap-2">
               <button id="videoInfoBtn" type="button" class="btn btn-light"><i class='bx bx-info-circle text-lg'></i> How to add videos</button>
-              <a href="https://drive.google.com/drive/folders/1Ot4nsPI2Q9oaxsj-T_JJSM9NMvs6GIy1?usp=sharing" target="_blank" rel="noopener" class="btn btn-primary"><i class='bx bxl-google-drive text-lg'></i> Open video Drive</a>
             </div>
           </div>
         </div>
@@ -560,21 +555,22 @@
             <div class="flex items-start justify-between gap-3">
               <div>
                 <h3 id="videoFormTitle" class="text-xl font-extrabold">Add video</h3>
-                <p class="text-xs text-slate-400 mt-1">Google Drive and YouTube thumbnails are handled automatically.</p>
+                <p class="text-xs text-slate-400 mt-1">Cloudinary and YouTube thumbnails are handled automatically.</p>
               </div>
               <button id="cancelVideoEdit" type="button" class="hidden btn btn-danger">Cancel</button>
             </div>
 
             <div><label class="text-xs font-bold text-slate-600 block mb-2">Headline *</label><input name="headline" class="field" placeholder="Vehicle handover video" required></div>
             <div><label class="text-xs font-bold text-slate-600 block mb-2">Description</label><textarea name="description" class="field" placeholder="Short context for this video..."></textarea></div>
+            <div><label class="text-xs font-bold text-slate-600 block mb-2" for="videoFile">Upload video to Cloudinary</label><input id="videoFile" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v" class="field"><p class="text-[11px] text-slate-500 mt-2">MP4, WebM or MOV. Files up to 100 MB. Upload happens when you save.</p></div>
             <div>
-              <label class="text-xs font-bold text-slate-600 block mb-2">Video link *</label>
-              <input name="video_url" type="url" class="field" placeholder="Paste Google Drive share link or another video URL" required>
+              <label class="text-xs font-bold text-slate-600 block mb-2">Video link</label>
+              <input name="video_url" type="url" class="field" placeholder="Cloudinary URL appears after upload, or paste another video URL">
               <div id="videoLinkHint" class="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-[11px] leading-5 text-slate-500">
-                Recommended: paste the normal Google Drive share link. No direct-link conversion is required.
+                Choose a file above to save it in Cloudinary. A link is only needed when using another video service.
               </div>
             </div>
-            <div><label class="text-xs font-bold text-slate-600 block mb-2">Custom thumbnail URL</label><input name="thumbnail_url" type="url" class="field" placeholder="Optional — Drive/YouTube thumbnail is automatic"></div>
+            <div><label class="text-xs font-bold text-slate-600 block mb-2">Custom thumbnail URL</label><input name="thumbnail_url" type="url" class="field" placeholder="Optional — Cloudinary/YouTube thumbnail is automatic"></div>
             <div id="videoLinkPreview" class="hidden rounded-2xl border border-slate-200 bg-white p-3">
               <div class="flex gap-3 items-center">
                 <div class="w-28 aspect-video rounded-xl overflow-hidden bg-slate-100 grid place-items-center flex-none"><img id="videoPreviewImg" class="w-full h-full object-cover hidden" alt="Video preview"><i id="videoPreviewIcon" class='bx bx-video text-2xl text-slate-300'></i></div>
@@ -623,23 +619,19 @@
   <div id="videoInfoOverlay" class="modal-backdrop fixed inset-0 z-[115] bg-slate-950/45 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-5" aria-hidden="true">
     <div class="bg-white w-full sm:max-w-2xl rounded-t-[28px] sm:rounded-[28px] shadow-float max-h-[92vh] overflow-y-auto">
       <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-slate-100 px-5 sm:px-7 py-4 flex items-center justify-between gap-4">
-        <div><p class="text-[10px] uppercase tracking-[.14em] text-thimadu font-extrabold">Video publishing guide</p><h3 class="text-xl font-extrabold tracking-tight mt-1">Add a Google Drive video</h3></div>
+        <div><p class="text-[10px] uppercase tracking-[.14em] text-thimadu font-extrabold">Video publishing guide</p><h3 class="text-xl font-extrabold tracking-tight mt-1">Add a Cloudinary video</h3></div>
         <button id="videoInfoClose" type="button" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 grid place-items-center text-xl"><i class='bx bx-x'></i></button>
       </div>
       <div class="p-5 sm:p-7">
         <div class="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-sm text-blue-900 leading-6">
-          All Thimadu videos can stay in Google Drive. The website extracts the Drive file ID from the normal share link, creates a thumbnail automatically, and opens the video in the Google Drive player.
+          Select a video file in the form, then save. The admin uploads it directly to Cloudinary and stores its playback URL in the video library.
         </div>
         <ol class="mt-6 grid gap-4">
-          <li class="flex gap-4"><span class="w-8 h-8 rounded-full bg-ink text-white grid place-items-center text-xs font-extrabold flex-none">1</span><div><h4 class="font-extrabold">Open the Thimadu video folder</h4><p class="text-sm text-slate-500 mt-1 leading-6">Use the Open video Drive button above, then upload the MP4/MOV video file to Google Drive.</p></div></li>
-          <li class="flex gap-4"><span class="w-8 h-8 rounded-full bg-ink text-white grid place-items-center text-xs font-extrabold flex-none">2</span><div><h4 class="font-extrabold">Set viewing permission</h4><p class="text-sm text-slate-500 mt-1 leading-6">Right-click the video → Share → General access → Anyone with the link → Viewer. Public visitors only need View permission; Edit permission is not required.</p></div></li>
-          <li class="flex gap-4"><span class="w-8 h-8 rounded-full bg-ink text-white grid place-items-center text-xs font-extrabold flex-none">3</span><div><h4 class="font-extrabold">Copy the normal Drive link</h4><p class="text-sm text-slate-500 mt-1 leading-6">A link such as <code class="px-1.5 py-1 bg-slate-100 rounded text-[11px] break-all">https://drive.google.com/file/d/FILE_ID/view?usp=sharing</code> is correct. Do not convert it to another URL.</p></div></li>
-          <li class="flex gap-4"><span class="w-8 h-8 rounded-full bg-ink text-white grid place-items-center text-xs font-extrabold flex-none">4</span><div><h4 class="font-extrabold">Create the Video entry</h4><p class="text-sm text-slate-500 mt-1 leading-6">Enter a clear headline, a useful description, paste the Drive link into Video link, choose display order/visibility, then Save video.</p></div></li>
-          <li class="flex gap-4"><span class="w-8 h-8 rounded-full bg-ink text-white grid place-items-center text-xs font-extrabold flex-none">5</span><div><h4 class="font-extrabold">Thumbnail is automatic</h4><p class="text-sm text-slate-500 mt-1 leading-6">For Google Drive videos the public site requests a Drive thumbnail automatically. If Drive does not generate one immediately, you may paste a custom public image URL in Custom thumbnail URL.</p></div></li>
+          <li class="flex gap-4"><span class="w-8 h-8 rounded-full bg-ink text-white grid place-items-center text-xs font-extrabold flex-none">1</span><div><h4 class="font-extrabold">Choose a video</h4><p class="text-sm text-slate-500 mt-1 leading-6">Select an MP4, WebM or MOV file, up to 100 MB.</p></div></li>
+          <li class="flex gap-4"><span class="w-8 h-8 rounded-full bg-ink text-white grid place-items-center text-xs font-extrabold flex-none">2</span><div><h4 class="font-extrabold">Add details and save</h4><p class="text-sm text-slate-500 mt-1 leading-6">Enter a headline and description, then save. Keep this page open until the upload finishes.</p></div></li>
+          <li class="flex gap-4"><span class="w-8 h-8 rounded-full bg-ink text-white grid place-items-center text-xs font-extrabold flex-none">3</span><div><h4 class="font-extrabold">Thumbnail is automatic</h4><p class="text-sm text-slate-500 mt-1 leading-6">Cloudinary supplies the video and poster image. You can override the poster with a custom thumbnail URL.</p></div></li>
         </ol>
-        <div class="mt-6 p-4 rounded-2xl bg-amber-50 border border-amber-100 text-sm text-amber-900 leading-6"><strong>Important:</strong> test the Drive link in a private/incognito browser. If it asks the visitor to request access, the video is not public yet.</div>
         <div class="mt-6 grid sm:grid-cols-2 gap-3">
-          <a href="https://drive.google.com/drive/folders/1Ot4nsPI2Q9oaxsj-T_JJSM9NMvs6GIy1?usp=sharing" target="_blank" rel="noopener" class="btn btn-primary h-12"><i class='bx bxl-google-drive text-lg'></i> Open Google Drive</a>
           <button id="videoInfoDone" type="button" class="btn btn-dark h-12">Got it</button>
         </div>
       </div>
@@ -722,6 +714,7 @@
 
       function detectVideoPlatformClient(url) {
         const value = String(url || "").toLowerCase();
+        if (/^https:\/\/res\.cloudinary\.com\/[a-z0-9_-]+\/video\/upload\//.test(value)) return "Cloudinary";
         if (driveId(value) && value.includes("drive.google.com")) return "Google Drive";
         if (value.includes("youtube.com") || value.includes("youtu.be")) return "YouTube";
         if (value.includes("vimeo.com")) return "Vimeo";
@@ -739,6 +732,8 @@
 
       function videoThumb(url, custom = "", size = 900) {
         if (safeUrl(custom)) return safeUrl(custom);
+        const cloudinary = String(url || "").match(/^(https:\/\/res\.cloudinary\.com\/[a-z0-9_-]+\/video\/upload\/)(.+)$/i);
+        if (cloudinary) return cloudinary[1] + cloudinary[2].replace(/\.[^./?]+(?:\?.*)?$/, ".jpg");
         const y = youtubeId(url);
         if (y) return `https://i.ytimg.com/vi/${encodeURIComponent(y)}/hqdefault.jpg`;
         const id = driveId(url);
@@ -807,6 +802,36 @@
           throw err;
         }
         return json;
+      }
+
+      async function uploadVideoToCloudinary(file) {
+        if (!/\.(mp4|webm|mov|m4v)$/i.test(file.name) || !file.type.startsWith("video/")) throw new Error("Choose an MP4, WebM or MOV video.");
+        if (file.size > 100 * 1024 * 1024) throw new Error("Video must be 100 MB or smaller.");
+        const signed = await apiPost({ action: "cloudinary_signature", token: state.token }, 30000);
+        const data = new FormData();
+        data.append("file", file);
+        data.append("api_key", signed.apiKey);
+        data.append("timestamp", signed.timestamp);
+        data.append("folder", signed.folder);
+        data.append("signature", signed.signature);
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", `https://api.cloudinary.com/v1_1/${encodeURIComponent(signed.cloudName)}/video/upload`);
+          xhr.upload.onprogress = event => {
+            if (event.lengthComputable) $("#busyText").textContent = `Uploading video: ${Math.round(event.loaded / event.total * 100)}%`;
+          };
+          xhr.onerror = () => reject(new Error("Cloudinary upload failed. Check your connection and try again."));
+          xhr.onload = () => {
+            let result;
+            try { result = JSON.parse(xhr.responseText); } catch { result = {}; }
+            if (xhr.status < 200 || xhr.status >= 300 || !result.secure_url) {
+              reject(new Error(result.error?.message || "Cloudinary upload failed."));
+              return;
+            }
+            resolve(/\.(mov|m4v)$/i.test(result.secure_url) ? result.secure_url.replace(/\.(mov|m4v)$/i, ".mp4") : result.secure_url);
+          };
+          xhr.send(data);
+        });
       }
 
       async function authenticate(token) {
@@ -1172,7 +1197,7 @@
                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-[10px] text-slate-400 font-semibold">
                   <span>Order ${escapeHtml(item.display_order ?? 0)}</span>
                   <span>${escapeHtml(item.posted_date || "")}</span>
-                  ${driveId(item.video_url) ? `<span class="text-thimadu">Drive hosted</span>` : ``}
+                  ${platform === "Cloudinary" ? `<span class="text-thimadu">Cloudinary hosted</span>` : ``}
                 </div>
                 <div class="flex flex-wrap gap-2 mt-4">
                   <a href="${escapeHtml(safeUrl(item.video_url))}" target="_blank" class="btn btn-light min-h-[36px] px-3"><i class='bx bx-play'></i> Open</a>
@@ -1467,9 +1492,7 @@
         box.classList.remove("hidden");
         const platform = detectVideoPlatformClient(url);
         $("#videoPreviewPlatform").textContent = platform;
-        $("#videoPreviewText").textContent = platform === "Google Drive"
-          ? "Drive link detected. Reviews will use the Drive preview player and a generated thumbnail."
-          : `${platform} link detected. The public reviews page will choose the best supported playback method.`;
+        $("#videoPreviewText").textContent = `${platform} video. The public page will show a 20 second preview and open the full video in a popup.`;
         const img = $("#videoPreviewImg"), icon = $("#videoPreviewIcon");
         const thumb = videoThumb(url, custom?.value || "", 700);
         if (thumb) {
@@ -1486,9 +1509,29 @@
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
         const isEdit = !!state.videoEditingId;
+        const selectedFile = $("#videoFile").files[0];
+        const linkInput = $("#videoForm [name=video_url]");
+        if (!selectedFile && !linkInput.value.trim()) {
+          showToast("Choose a video file or enter a video link.", true);
+          return;
+        }
+        if (!selectedFile && /^(?:https?:\/\/)?drive\.google\.com\//i.test(linkInput.value.trim()) && !isEdit) {
+          showToast("Upload new videos to Cloudinary instead of Google Drive.", true);
+          return;
+        }
 
-        setBusy(true, isEdit ? "Saving video" : "Adding video", "Updating the video library...");
+        setBusy(true, selectedFile ? "Uploading video" : isEdit ? "Saving video" : "Adding video", selectedFile ? "Preparing Cloudinary upload..." : "Updating the video library...");
         try {
+          if (selectedFile) {
+            const thumbnailInput = $("#videoForm [name=thumbnail_url]");
+            const previousAutoThumbnail = videoThumb(linkInput.value.trim());
+            linkInput.value = await uploadVideoToCloudinary(selectedFile);
+            if (thumbnailInput.value.trim() === previousAutoThumbnail) thumbnailInput.value = "";
+            $("#videoFile").value = "";
+            updateVideoLinkPreview();
+            $("#busyTitle").textContent = "Saving video";
+            $("#busyText").textContent = "Updating the video library...";
+          }
           const res = await apiPost({
             action: isEdit ? "update" : "create",
             resource: "videos",
@@ -1496,8 +1539,8 @@
             id: state.videoEditingId || "",
             headline: fd.get("headline"),
             description: fd.get("description"),
-            video_url: fd.get("video_url"),
-            thumbnail_url: fd.get("thumbnail_url"),
+            video_url: linkInput.value.trim(),
+            thumbnail_url: $("#videoForm [name=thumbnail_url]").value.trim(),
             display_order: fd.get("display_order"),
             status: fd.get("status")
           });

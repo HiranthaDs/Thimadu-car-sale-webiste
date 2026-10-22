@@ -35,6 +35,14 @@
 .reels-arrow-prev{left:-18px}
 .reels-arrow-prev svg{transform:rotate(180deg)}
 .reels-arrow-next{right:-18px}
+.reels-dialog{width:min(900px,calc(100% - 32px));max-width:none;max-height:90dvh;padding:0;border:0;border-radius:20px;background:#102044;color:#fff;box-shadow:0 30px 90px #0008;overflow:auto}
+.reels-dialog::backdrop{background:#061127c9;backdrop-filter:blur(5px)}
+.reels-dialog-inner{position:relative;padding:18px}
+.reels-dialog video,.reels-dialog iframe{display:block;width:100%;max-height:75dvh;aspect-ratio:16/9;object-fit:contain;border:0;border-radius:12px;background:#000}
+.reels-dialog h3{margin:15px 48px 4px 2px;font:600 clamp(18px,2vw,26px)/1.2 Ubuntu,system-ui,sans-serif}
+.reels-dialog p{padding:30px}.reels-dialog a{color:#a8c8ff}
+.reels-dialog-close{position:absolute;z-index:2;top:28px;right:28px;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#fff;color:#102044;cursor:pointer}
+.reels-dialog-close svg{width:20px;height:20px}
 @media(max-width:1050px){.reels-rail{--reels-card-width:calc((100% - 24px)/2.45)}}
 @media(max-width:600px){.reels-rail{--reels-card-width:calc((100% - 12px)/1.45)}.reels-card{border-radius:14px}.reels-details{right:12px;bottom:18px;left:12px}.reels-details h3{font-size:17px}.reels-details p{font-size:10px}.reels-arrow{width:42px;height:42px}.reels-arrow-prev{left:-9px}.reels-arrow-next{right:-9px}}
 @media(prefers-reduced-motion:reduce){.reels-rail{scroll-behavior:auto}.reels-card,.reels-arrow{transition:none}.reels-card:hover{transform:none}.reels-progress i{animation:none}}

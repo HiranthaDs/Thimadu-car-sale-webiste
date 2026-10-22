@@ -55,6 +55,10 @@ Small screens use a stacked phone layout and stacked photographic scenes. Reduce
 
 Search supports make, model, type, fuel, price, year, condition and availability. Filters are retained in the URL. Stock detail views refresh when the inventory source updates, label cached information and preserve the stock reference when opening a support enquiry. Reviews retain a working photo or video collection when the other source is unavailable.
 
+### Cloudinary video uploads
+
+The video admin uploads files directly to Cloudinary and stores the returned video URL in the `videos` sheet. In the Apps Script project, add `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` under **Project Settings → Script Properties**, then deploy a new version of `Code.gs`. Keep the API secret out of the website files. The admin password is required before the script issues a short lived upload signature. Uploads are limited to 100 MB; larger files need Cloudinary's chunked upload API. Existing video records remain readable, while the admin form directs new uploads to Cloudinary.
+
 Enquiry forms validate details and open a WhatsApp draft to `+94 77 181 3928`. Visitors review and send the draft themselves. The website does not claim an enquiry has been saved to a database or automatically sent.
 
 ## Production hosting

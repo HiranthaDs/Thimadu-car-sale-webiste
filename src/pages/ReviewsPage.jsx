@@ -7,7 +7,7 @@ import './reviews.css';
 const SHEET_ID = '1kyJXiH67w19sgt5sqeDeiqytXUVMlqAsrEKKJwRaue0';
 const CUSTOMER_GID = '1902933500';
 const VIDEO_GID = '1018172779';
-const API = 'https://script.google.com/macros/s/AKfycbzua3u-DZejQpn5fEBVi9v2qatu1du6F2pIU-s2eF9NyhJVKcIgO8foP8SFnZ1XygEOpg/exec';
+const API = 'https://script.google.com/macros/s/AKfycbxNlpop6xW-D8ufDsdjIajmX9ct6vUlcan3BPcfKLPM1LNl1DLyKnLC47WdKzVgW7Z2xA/exec';
 const PAGE_SIZE = 12;
 const clean = (value) => String(value ?? '').trim();
 
@@ -165,17 +165,11 @@ async function fetchApi(kind, signal) {
 }
 
 async function fetchCollection(kind, gid, signal) {
-  // The Apps Script endpoint is the live source the admin writes to. Prefer it
-  // so an older, published Sheets feed cannot win just because it responds first.
+  // The Apps Script endpoint is the live source the admin writes to. Its empty
+  // result is authoritative too, so deleted videos cannot reappear from Sheets.
   try {
     const apiRows = await fetchApi(kind, signal);
-    if (apiRows.length) return apiRows;
-    try {
-      const sheetRows = await fetchSheet(gid, signal);
-      return sheetRows.length ? sheetRows : apiRows;
-    } catch {
-      return apiRows;
-    }
+    return apiRows;
   } catch (apiError) {
     if (signal.aborted) throw apiError;
     return fetchSheet(gid, signal);
@@ -202,8 +196,7 @@ export async function loadVideoStories(signal) {
 }
 
 export async function loadStories(signal, { withStatus = false } = {}) {
-  // Prefer the live admin API and fall back to the published sheet only when
-  // the API is unavailable or has no published stories yet.
+  // Prefer the live admin API and use the published sheet only if it is unavailable.
   const collections = await Promise.all([
     fetchCollection('customers', CUSTOMER_GID, signal).then(value => ({ status: 'fulfilled', value }), reason => ({ status: 'rejected', reason })),
     fetchCollection('videos', VIDEO_GID, signal).then(value => ({ status: 'fulfilled', value }), reason => ({ status: 'rejected', reason })),
