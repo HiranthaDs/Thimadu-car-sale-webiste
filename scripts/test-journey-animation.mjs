@@ -58,6 +58,32 @@ try {
 
   await page.screenshot({ path: '.audit/current/journey-card-animation.png' });
   console.log('PASS journey cards: entrance reveal, independent scroll movement, staggered contents, and tab-change replay');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForFunction(() => !document.querySelector('.jt-panel')?.classList.contains('jt-motion-ready'));
+  await page.locator('#journey-selector').selectOption('0');
+  const mobileChapter = page.locator('.jt-chapter').first();
+  await mobileChapter.scrollIntoViewIfNeeded();
+  const mobileState = await mobileChapter.evaluate(element => ({
+    motionReady: element.closest('.jt-panel').classList.contains('jt-motion-ready'),
+    visualOpacity: getComputedStyle(element.querySelector('.jt-chapter-visual')).opacity,
+    visualAnimation: getComputedStyle(element.querySelector('.jt-chapter-visual')).animationName,
+    ringAnimation: getComputedStyle(element.querySelector('.jt-visual-ring')).animationName,
+    phoneAnimation: getComputedStyle(element.querySelector('.hs-screen-body')).animationName,
+    fieldAnimation: element.querySelector('.hs-demo-field') ? getComputedStyle(element.querySelector('.hs-demo-field')).animationName : 'none',
+    visualOffset: element.style.getPropertyValue('--jt-visual-y'),
+    copyOffset: element.style.getPropertyValue('--jt-copy-y'),
+  }));
+  if (mobileState.motionReady || mobileState.visualOpacity !== '1' ||
+      [mobileState.visualAnimation, mobileState.ringAnimation, mobileState.phoneAnimation, mobileState.fieldAnimation].some(value => value !== 'none') ||
+      mobileState.visualOffset || mobileState.copyOffset) {
+    throw new Error(`Mobile journey still animates: ${JSON.stringify(mobileState)}`);
+  }
+  await page.locator('#journey-selector').selectOption('1');
+  if (!(await page.locator('.jt-chapter-copy h3').first().textContent()).includes('Tell us about your vehicle')) {
+    throw new Error('Mobile journey selector stopped changing the displayed content');
+  }
+  console.log('PASS mobile journey: static cards and phone previews; selector still changes content');
 } finally {
   await browser.close();
 }

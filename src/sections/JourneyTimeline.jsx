@@ -44,12 +44,19 @@ const journeys = [
 
 export default function JourneyTimeline() {
   const [selected, setSelected] = useState(0);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches);
   const buttonRefs = useRef([]);
   const panelRef = useRef(null);
   const journey = journeys[selected];
   useEffect(() => {
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
+    const updateMobile = () => setIsMobile(mobileQuery.matches);
+    mobileQuery.addEventListener('change', updateMobile);
+    return () => mobileQuery.removeEventListener('change', updateMobile);
+  }, []);
+  useEffect(() => {
     const panel = panelRef.current;
-    if (!panel || !('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!panel || isMobile || !('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const chapters = [...panel.querySelectorAll('.jt-chapter')];
     const settleTimers = [];
     let animationFrame = 0;
@@ -66,14 +73,13 @@ export default function JourneyTimeline() {
     const updateCardPositions = () => {
       animationFrame = 0;
       const viewportHeight = window.innerHeight;
-      const mobileStrength = window.innerWidth < 768 ? .55 : 1;
       chapters.forEach(chapter => {
         const bounds = chapter.getBoundingClientRect();
         if (bounds.bottom < -100 || bounds.top > viewportHeight + 100) return;
         const travel = (bounds.top + bounds.height / 2 - viewportHeight / 2) / ((viewportHeight + bounds.height) / 2);
         const progress = Math.max(-1, Math.min(1, travel));
-        chapter.style.setProperty('--jt-visual-y', `${(progress * 38 * mobileStrength).toFixed(2)}px`);
-        chapter.style.setProperty('--jt-copy-y', `${(progress * -27 * mobileStrength).toFixed(2)}px`);
+        chapter.style.setProperty('--jt-visual-y', `${(progress * 38).toFixed(2)}px`);
+        chapter.style.setProperty('--jt-copy-y', `${(progress * -27).toFixed(2)}px`);
       });
     };
     const requestCardUpdate = () => {
@@ -88,8 +94,13 @@ export default function JourneyTimeline() {
       window.removeEventListener('resize', requestCardUpdate);
       if (animationFrame) cancelAnimationFrame(animationFrame);
       settleTimers.forEach(timer => clearTimeout(timer));
+      panel.classList.remove('jt-motion-ready');
+      chapters.forEach(chapter => {
+        chapter.style.removeProperty('--jt-visual-y');
+        chapter.style.removeProperty('--jt-copy-y');
+      });
     };
-  }, [selected]);
+  }, [selected, isMobile]);
   function selectJourney(index) { setSelected(index); }
   function handleTabKey(event, index) {
     const next = event.key === 'ArrowRight' ? (index + 1) % journeys.length : event.key === 'ArrowLeft' ? (index + journeys.length - 1) % journeys.length : event.key === 'Home' ? 0 : event.key === 'End' ? journeys.length - 1 : undefined;
