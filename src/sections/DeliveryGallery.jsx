@@ -23,9 +23,16 @@ const CUSTOMER_LOCATIONS = [
 function CustomerSphere() {
   const [holding, setHolding] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [compact, setCompact] = useState(() => matchMedia('(max-width: 700px)').matches);
+  useEffect(() => {
+    const query = matchMedia('(max-width: 700px)');
+    const update = () => setCompact(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
   return <div className="delivery-sphere-wrap">
     <div className="delivery-sphere-stage" aria-label="Customer locations flag sphere">
-      <InfiniteMenu items={CUSTOMER_LOCATIONS} count={96} tileSize={0.72} roundness={0.18} zoom={holding ? 0.34 : 0.39} pullBack={0.2} stretch={0.5} inertia={0.6} autoplay={4} grayscale={false} dim={0} intro showInfo={false} theme="light" accentColor="#2563ff" backgroundColor="transparent" className="delivery-infinite-menu" onActiveChange={(_, index) => setActiveIndex(index)} onInteractionChange={setHolding} />
+      <InfiniteMenu key={compact ? 'compact' : 'full'} items={CUSTOMER_LOCATIONS} count={compact ? 48 : 96} tileSize={0.72} roundness={0.18} zoom={holding ? 0.34 : 0.39} pullBack={0.2} stretch={0.5} inertia={0.6} autoplay={compact ? 0 : 4} grayscale={false} dim={0} intro={!compact} showInfo={false} theme="light" accentColor="#2563ff" backgroundColor="transparent" className="delivery-infinite-menu" onActiveChange={(_, index) => setActiveIndex(index)} onInteractionChange={setHolding} />
     </div>
     <div className="delivery-sphere-caption"><strong>{CUSTOMER_LOCATIONS[activeIndex]?.title}</strong><span>Drag to explore our customers</span></div>
   </div>;

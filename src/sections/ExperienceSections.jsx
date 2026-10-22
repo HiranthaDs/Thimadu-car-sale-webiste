@@ -123,13 +123,16 @@ function useScrollProgress(ref, property = '--ex-progress') {
     const desktop = matchMedia('(min-width: 901px)');
     if (!section) return;
     let frame = 0;
+    let previous = '';
     const update = () => {
       frame = 0;
-      if (reduced.matches || !desktop.matches) { section.style.setProperty(property, '1'); return; }
+      if (reduced.matches || !desktop.matches) { if (previous !== '1') section.style.setProperty(property, '1'); previous = '1'; return; }
       const box = section.getBoundingClientRect();
       const travel = property === '--ex-progress' ? Math.max(1, box.height - innerHeight) : Math.max(1, innerHeight * .8);
       const progress = property === '--ex-progress' ? -box.top / travel : (innerHeight - box.top) / travel;
-      section.style.setProperty(property, Math.min(1, Math.max(0, progress)).toFixed(4));
+      const value = Math.min(1, Math.max(0, progress)).toFixed(3);
+      if (value !== previous) section.style.setProperty(property, value);
+      previous = value;
     };
     const requestUpdate = () => { if (!frame) frame = requestAnimationFrame(update); };
     update();

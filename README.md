@@ -34,7 +34,7 @@ The full homepage includes:
 10. Current vehicle listings, search and category shortcuts.
 11. Expanding service guides, FAQs, a large closing dial and the two-panel footer with outlined wordmark and an enquiry form.
 
-Small screens use a stacked phone layout and stacked photographic scenes. Reduced motion disables pinned sequences, animated page curtains and automatic phone cycling. Hero video does not autoplay under reduced-motion or data-saving preferences; it can be played explicitly. Phone, film and story animations avoid unnecessary work when out of view. Keyboard focus is managed in mobile navigation and native dialogs.
+Small screens use a stacked phone layout and stacked photographic scenes. Reduced motion disables pinned sequences, animated page curtains and automatic phone cycling. The hero film starts on tap on mobile, under reduced motion, or with data saving enabled; desktop autoplay remains available. Phone, film and story animations avoid unnecessary work when out of view. Keyboard focus is managed in mobile navigation and native dialogs.
 
 ## Routes
 

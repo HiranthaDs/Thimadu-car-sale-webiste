@@ -1,6 +1,4 @@
 .reels-gallery{position:relative;width:100%;min-width:0}
-.reels-preloads{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
-.reels-preloads video{display:block;width:1px;height:1px}
 .reels-viewport{position:relative}
 .reels-rail{--reels-gap:12px;--reels-card-width:calc((100% - 36px)/3.4);display:flex;gap:var(--reels-gap);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y;cursor:grab;user-select:none;outline:none}
 .reels-rail:active{cursor:grabbing}

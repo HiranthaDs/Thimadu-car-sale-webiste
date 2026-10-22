@@ -206,7 +206,7 @@ const InfiniteMenu = ({
   useEffect(() => {
     const root = rootRef.current;
     const canvas = canvasRef.current;
-    const gl = canvas?.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: true });
+    const gl = canvas?.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: window.innerWidth >= 701 });
     if (!root || !canvas || !gl) return undefined;
 
     const vertex = compile(gl, gl.VERTEX_SHADER, VERTEX);
@@ -368,7 +368,7 @@ const InfiniteMenu = ({
       const request = ++atlas.request;
       const total = Math.max(1, list.length);
       atlas.cells = Math.ceil(Math.sqrt(total));
-      atlas.cell = clamp(Math.floor(4096 / atlas.cells), 64, 512);
+      atlas.cell = clamp(Math.floor(4096 / atlas.cells), 64, window.innerWidth < 701 ? 128 : 512);
       atlas.canvas.width = atlas.cells * atlas.cell;
       atlas.canvas.height = atlas.cells * atlas.cell;
       const ctx = atlas.canvas.getContext('2d');
@@ -772,7 +772,7 @@ const InfiniteMenu = ({
     };
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 701 ? 1 : 1.5);
       state.width = Math.max(1, root.clientWidth);
       state.height = Math.max(1, root.clientHeight);
       canvas.width = Math.round(state.width * dpr);

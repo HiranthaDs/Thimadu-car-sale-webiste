@@ -15,6 +15,13 @@ const customerFixtures = [
   { id: 'experience-b', headline: 'Experience fixture B', description: 'Second synthetic delivery story for carousel verification.', customer_name: 'Fixture B', location: 'Kandy', image_url: `${base}/images/hero.webp`, status: 'Active', display_order: 2 },
   { id: 'experience-hidden', headline: 'Unpublished experience fixture', description: 'This record must not appear.', customer_name: 'Hidden fixture', image_url: `${base}/images/journey.webp`, status: 'Inactive', display_order: 0 },
 ];
+await context.route('https://script.google.com/macros/s/**', async route => {
+  const url = new URL(route.request().url());
+  if (url.searchParams.get('action') !== 'read') return route.continue();
+  const kind = url.searchParams.get('type');
+  if (kind !== 'customers' && kind !== 'videos') return route.continue();
+  await route.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ status: 'success', data: kind === 'customers' ? customerFixtures : [] }) });
+});
 await context.route('https://docs.google.com/spreadsheets/d/*/gviz/**', async (route) => {
   const url = new URL(route.request().url());
   const callback = url.searchParams.get('tqx')?.split('responseHandler:')[1];

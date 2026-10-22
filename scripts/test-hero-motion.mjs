@@ -34,6 +34,12 @@ try {
   await expect.poll(()=>video.evaluate(n=>n.paused)).toBe(false);
   await page.getByRole('button',{name:'Pause hero video',exact:true}).click();
   await expect.poll(()=>video.evaluate(n=>n.paused)).toBe(true);
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(base,{waitUntil:'domcontentloaded'});
+  assert.equal(await video.getAttribute('src'),null);
+  await page.getByRole('button',{name:'Play hero video',exact:true}).click();
+  await expect.poll(()=>video.evaluate(n=>n.paused)).toBe(false);
   assert.deepEqual(errors,[]);
-  console.log('PASS: supplied hero video playback/pause, scroll-driven 3D transforms, offscreen video pause, automatic phone navigation, interaction pause, and explicit reduced-motion playback.');
+  console.log('PASS: hero playback/pause, scroll transforms, offscreen pause, phone navigation, reduced-motion playback, and mobile tap-to-play.');
 } finally {await browser.close();}

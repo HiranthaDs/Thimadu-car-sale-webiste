@@ -80,19 +80,28 @@ function BrandRail() {
 export default function HeroStory() {
   const root = useRef(null), video = useRef(null), showcase = useRef(null), opening = useRef(null);
   const [reduced,setReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [compact,setCompact] = useState(() => matchMedia('(max-width: 900px)').matches);
   const [paused,setPaused] = useState(false);
   const [videoFailed,setVideoFailed] = useState(false);
   const [videoPlaying,setVideoPlaying] = useState(false);
   const [view,setView] = useState(0);
   useEffect(() => { const media = matchMedia('(prefers-reduced-motion: reduce)'); const update = () => setReduced(media.matches); media.addEventListener('change',update); return () => media.removeEventListener('change',update); }, []);
+  useEffect(() => { const media = matchMedia('(max-width: 900px)'); const update = () => setCompact(media.matches); media.addEventListener('change',update); return () => media.removeEventListener('change',update); }, []);
   useEffect(() => {
     const node = root.current;
     let frame = 0;
+    let lastProgress = NaN;
+    let lastStatic = null;
+    let lastWidth = 0;
     const render = () => {
       frame = 0;
       const box = node.getBoundingClientRect();
       const staticLayout = reduced || innerWidth < 901;
       const p = staticLayout ? 1 : clamp(-box.top / Math.max(1,box.height-innerHeight));
+      if (staticLayout === lastStatic && innerWidth === lastWidth && Math.abs(p - lastProgress) < .002) return;
+      lastProgress = p;
+      lastStatic = staticLayout;
+      lastWidth = innerWidth;
       const morph = clamp(p / .42), settle = clamp((p-.32)/.43);
       node.style.setProperty('--hero-opacity', staticLayout ? 1 : 1-clamp(p/.24));
       node.style.setProperty('--phone-opacity', staticLayout ? 1 : clamp((p-.08)/.15));
@@ -110,20 +119,20 @@ export default function HeroStory() {
       const film = video.current;
       const filmInView = staticLayout ? opening.current?.getBoundingClientRect().bottom > 0 : p < .24;
       if (film && !filmInView && !film.paused) film.pause();
-      else if (film && filmInView && film.paused && !paused && !reduced && !navigator.connection?.saveData && !document.hidden) film.play().catch(() => {});
+      else if (film && filmInView && film.paused && !paused && !reduced && !compact && !navigator.connection?.saveData && !document.hidden) film.play().catch(() => {});
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(render); };
     render(); window.addEventListener('scroll',schedule,{passive:true}); window.addEventListener('resize',schedule);
     return () => {cancelAnimationFrame(frame);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);};
-  }, [reduced,paused]);
+  }, [reduced,compact,paused]);
   useEffect(() => {
     const film = video.current;
     if (!film) return;
     let visible = true;
-    const update = () => { if (visible && !opening.current?.inert && !document.hidden && !paused && !reduced && !navigator.connection?.saveData) film.play().catch(() => {}); else film.pause(); };
+    const update = () => { if (visible && !opening.current?.inert && !document.hidden && !paused && !reduced && !compact && !navigator.connection?.saveData) film.play().catch(() => {}); else film.pause(); };
     const observer = new IntersectionObserver(([entry]) => {visible=entry.isIntersecting;update();}); observer.observe(film); document.addEventListener('visibilitychange',update); update();
     return () => {observer.disconnect();document.removeEventListener('visibilitychange',update);film.pause();};
-  }, [paused,reduced]);
+  }, [paused,reduced,compact]);
   function explorePhone(event) {
     event.preventDefault();
     const node = root.current;
@@ -133,10 +142,10 @@ export default function HeroStory() {
   return <section className={`hs-story ${reduced ? 'hs-reduced' : ''} ${paused ? 'hs-paused' : ''}`} ref={root} aria-label="Discover Thimadu Auto Traders">
     <div className="hs-stage">
       <div className="hs-opening" ref={opening}>
-        <div className="hs-film"><video ref={video} className="hs-video" src={reduced || navigator.connection?.saveData ? undefined : '/Videos/hero1.mp4'} poster="/images/hero1-poster.webp" muted loop playsInline preload="metadata" aria-label="Thimadu automotive film" onPlay={()=>setVideoPlaying(true)} onPause={()=>setVideoPlaying(false)} onError={() => setVideoFailed(true)}/><div className="hs-film-overlay"/></div>
+        <div className="hs-film"><video ref={video} className="hs-video" src={reduced || compact || navigator.connection?.saveData ? undefined : '/Videos/hero1.mp4'} poster="/images/hero1-poster.webp" muted loop playsInline preload="metadata" aria-label="Thimadu automotive film" onPlay={()=>setVideoPlaying(true)} onPause={()=>setVideoPlaying(false)} onError={() => setVideoFailed(true)}/><div className="hs-film-overlay"/></div>
         <div className="hs-intro"><p className="hs-eyebrow">YOUR NEXT CHAPTER STARTS HERE</p><h1>Thimadu<span>Auto Traders</span></h1><p>Find the vehicle that moves you.<br/>Buying, selling and sourcing.<br/>A more personal journey, across Sri Lanka.</p><Link to="/all-vehicles.html" className="hs-opening-link">Explore our vehicles <Icon name="arrow" size={18}/></Link></div>
         <a className="hs-scroll-link" href="#your-journey" onClick={explorePhone}>Scroll to discover <span><Icon name="arrow" size={18}/></span></a>
-        {!videoFailed && <button className="hs-video-control" type="button" onClick={() => {if(reduced || navigator.connection?.saveData){const film=video.current;if(!film.src)film.src='/Videos/hero1.mp4';if(film.paused)film.play().catch(()=>{});else film.pause();}else setPaused(value=>!value);}} aria-label={videoPlaying ? 'Pause hero video' : 'Play hero video'}><Icon name={videoPlaying ? 'pause':'play'} size={14}/>{videoPlaying ? 'Pause film':'Play film'}</button>}
+        {!videoFailed && <button className="hs-video-control" type="button" onClick={() => {if(reduced || compact || navigator.connection?.saveData){const film=video.current;if(!film.src)film.src='/Videos/hero1.mp4';if(film.paused)film.play().catch(()=>{});else film.pause();}else setPaused(value=>!value);}} aria-label={videoPlaying ? 'Pause hero video' : 'Play hero video'}><Icon name={videoPlaying ? 'pause':'play'} size={14}/>{videoPlaying ? 'Pause film':'Play film'}</button>}
       </div>
       <div className="hs-showcase" id="your-journey" ref={showcase}>
         <div className="hs-copy"><h2>Your next vehicle.<br/>Your next adventure.<br/>Find it. Feel it.<br/><span>Make it yours.</span></h2><p>Explore our collection, tell us what you’re looking for, and connect with a team that understands your next move.</p><Button to="/all-vehicles.html">Find my next vehicle <Icon name="arrow"/></Button><div className="hs-preview-control"><button type="button" onClick={()=>setPaused(value=>!value)} aria-pressed={paused} aria-label={paused?'Play phone website demo':'Pause phone website demo'}><Icon name={paused?'play':'pause'} size={13}/>{paused ? 'Play the website preview':'Website preview playing'}</button></div></div>
@@ -152,7 +161,8 @@ export function ConfidenceGauge() {
   const section = useRef(null);
   useEffect(() => {
     let frame=0;
-    const update=()=>{frame=0;const node=section.current;if(!node)return;const box=node.getBoundingClientRect();node.style.setProperty('--gauge-progress',clamp((innerHeight-box.top)/(innerHeight+box.height)));};
+    let previous = NaN;
+    const update=()=>{frame=0;const node=section.current;if(!node)return;const box=node.getBoundingClientRect();const progress=clamp((innerHeight-box.top)/(innerHeight+box.height));if(Math.abs(progress-previous)<.002)return;previous=progress;node.style.setProperty('--gauge-progress',progress);};
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};update();window.addEventListener('scroll',schedule,{passive:true});return()=>{cancelAnimationFrame(frame);window.removeEventListener('scroll',schedule);};
   },[]);
   return <section ref={section} className="confidence-gauge" aria-labelledby="confidence-heading"><h2 id="confidence-heading">More possibilities.<br/><span>Less second-guessing.</span></h2><div className="cg-benefit-window"><div className="cg-benefit-track">{[0,1].map(copy=><div className="cg-benefit-group" key={copy} aria-hidden={copy===1?true:undefined}>{benefits.map(([title,icon])=><div className="cg-benefit" key={title}><h3>{title}</h3><Icon name={icon} size={31}/></div>)}</div>)}</div></div><div className="cg-gauge"><svg viewBox="0 0 860 450" fill="none" aria-hidden="true">{Array.from({length:41},(_,index)=>{const angle=(180+index*4.5)*Math.PI/180;const inside=index%5===0?348:370;return <line key={index} x1={430+Math.cos(angle)*inside} y1={430+Math.sin(angle)*inside} x2={430+Math.cos(angle)*395} y2={430+Math.sin(angle)*395} stroke="currentColor" strokeWidth={index%5===0?2.3:1.7}/>;})}<g className="cg-needle"><path d="M422 420 430 155 438 420Z" fill="currentColor"/><circle cx="430" cy="430" r="15" fill="currentColor"/></g></svg><div className="cg-gauge-copy"><h3>A little guidance.<br/>A lot more confidence.</h3><p>Every next move starts with understanding<br/>what matters to you.</p></div></div><a className="cg-discover" href="#how-it-works">Discover how it works <span><Icon name="arrow" size={18}/></span></a></section>;

@@ -39,7 +39,6 @@ export default function VideoCoverflow({ stories }) {
   const [previewState, setPreviewState] = useState('idle');
   const [previewStarted, setPreviewStarted] = useState(false);
   const [openStory, setOpenStory] = useState(null);
-  const [warmedIndexes, setWarmedIndexes] = useState(() => new Set());
   const [scrollBounds, setScrollBounds] = useState({ previous: false, next: stories.length > 1 });
 
   const slides = useMemo(() => stories.map(story => {
@@ -105,16 +104,6 @@ export default function VideoCoverflow({ stories }) {
     preference.addEventListener?.('change', motion);
     return () => { document.removeEventListener('visibilitychange', visibility); preference.removeEventListener?.('change', motion); };
   }, []);
-
-  useEffect(() => {
-    if (!inView) return;
-    setWarmedIndexes(current => {
-      const next = new Set(current);
-      for (let index = 0; index < Math.min(3, slides.length); index += 1) next.add(index);
-      for (let index = activeIndex; index < Math.min(activeIndex + 3, slides.length); index += 1) next.add(index);
-      return next.size === current.size ? current : next;
-    });
-  }, [activeIndex, inView, slides.length]);
 
   useEffect(() => {
     window.clearTimeout(previewTimer.current);
@@ -188,12 +177,7 @@ export default function VideoCoverflow({ stories }) {
   };
 
   if (!slides.length) return <p className="delivery-empty">Customer video stories will appear here when published.</p>;
-  const preloads = [...warmedIndexes].filter(index => index > activeIndex && index < activeIndex + 3 && slides[index]?.preview.kind === 'video');
-
   return <div className="reels-gallery">
-    <div className="reels-preloads" aria-hidden="true">
-      {preloads.map(index => <video key={slides[index].story.key || index} src={slides[index].preview.src} preload="metadata" muted playsInline />)}
-    </div>
     <div className="reels-viewport">
       <div className="reels-rail" ref={railRef} role="region" aria-label="Customer video stories. Swipe, drag, or use the arrow keys to browse." tabIndex={0} onScroll={settle} onKeyDown={onKeyDown} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onPointerLeave={onPointerUp}>
         {slides.map(({ story, preview, poster }, index) => {
@@ -202,7 +186,7 @@ export default function VideoCoverflow({ stories }) {
           return <article className={`reels-card${active ? ' is-active' : ''}`} key={story.key || story.id || story.videoUrl} ref={node => { cardRefs.current[index] = node; }} aria-current={active ? 'true' : undefined}>
             <div className="reels-media">
               {poster && <img className="reels-poster" src={poster} alt="" loading={index < 3 ? 'eager' : 'lazy'} />}
-              {showPlayer && preview.kind === 'video' && <video key={index} className="reels-player" ref={videoRef} src={preview.src} poster={poster || undefined} muted playsInline autoPlay preload="auto" onLoadedData={event => { event.currentTarget.currentTime = 0; event.currentTarget.play().catch(() => setPreviewState('blocked')); }} onPlay={beginPreview} onTimeUpdate={event => { if (event.currentTarget.currentTime >= PREVIEW_SECONDS) { event.currentTarget.pause(); setPreviewState('complete'); } }} onEnded={() => setPreviewState('complete')} onError={() => setPreviewState('unavailable')} />}
+              {showPlayer && preview.kind === 'video' && <video key={index} className="reels-player" ref={videoRef} src={preview.src} poster={poster || undefined} muted playsInline autoPlay preload="metadata" onLoadedData={event => { event.currentTarget.currentTime = 0; event.currentTarget.play().catch(() => setPreviewState('blocked')); }} onPlay={beginPreview} onTimeUpdate={event => { if (event.currentTarget.currentTime >= PREVIEW_SECONDS) { event.currentTarget.pause(); setPreviewState('complete'); } }} onEnded={() => setPreviewState('complete')} onError={() => setPreviewState('unavailable')} />}
               {showPlayer && preview.kind === 'embed' && <iframe className={`reels-player${previewStarted ? '' : ' is-loading'}`} src={preview.src} title={`${story.title} preview`} allow="autoplay; encrypted-media; picture-in-picture" loading="lazy" referrerPolicy="no-referrer" onLoad={beginPreview} onError={() => setPreviewState('unavailable')} />}
               <div className="reels-shade" aria-hidden="true" />
               <span className="reels-play-icon" aria-hidden="true"><Icon name="play" /></span>
