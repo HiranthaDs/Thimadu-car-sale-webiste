@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Header from './navigation';
 import { Footer } from './components';
 import PageTransition from './PageTransition';
+import FloatingWhatsApp from './FloatingWhatsApp';
 import HomePage from './pages/HomePage';
 import { InventoryPage, VehicleDetailsPage } from './inventory';
 
@@ -25,5 +26,5 @@ export default function App() {
       <Route path="/vehicle-information-support.html" element={<ServicePage kind="support"/>}/>
       <Route path="*" element={<NotFoundPage/>}/>
     </Routes>
-  </Suspense></div></main><Footer/></>}</PageTransition></>;
+  </Suspense></div></main><Footer/></>}</PageTransition><FloatingWhatsApp/></>;
 }

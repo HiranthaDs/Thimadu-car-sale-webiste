@@ -82,6 +82,36 @@ input, select, textarea, button { max-width: 100%; }
   .detail-enquiry { padding-inline: 19px; }
 }
 
+.floating-whatsapp {
+  position: fixed;
+  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 65;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 7px 22px #102a1b38;
+  transition: transform .2s, background .2s, box-shadow .2s;
+}
+
+.floating-whatsapp svg { width: 32px; height: 32px; }
+.floating-whatsapp:hover { transform: translateY(-3px); background: #1cba57; box-shadow: 0 10px 25px #102a1b45; }
+.floating-whatsapp:focus-visible { outline-color: #14532d; }
+
+@media (max-width: 767px) {
+  .floating-whatsapp {
+    right: 16px;
+    bottom: calc(94px + env(safe-area-inset-bottom, 0px));
+    width: 54px;
+    height: 54px;
+  }
+  .floating-whatsapp svg { width: 29px; height: 29px; }
+}
+
 @media (max-height: 520px) and (orientation: landscape) {
   .premium-mobile-navigation.mobile-navigation { max-height: 100dvh; overflow-y: auto; }
   .nav-search-dialog, .nav-search-panel { max-height: calc(100dvh - 16px); }
