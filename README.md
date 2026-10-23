@@ -53,6 +53,8 @@ Small screens use a stacked phone layout and stacked photographic scenes. Reduce
 | Not found / recovery search | `/404.html` |
 | Existing administration | `/admin.html`, `/ADMIN-THIMADU.html` |
 
+For everyday content updates, see the [short admin user manual](ADMIN-USER-MANUAL.md).
+
 Search supports make, model, type, fuel, price, year, condition and availability. Filters are retained in the URL. Stock detail views refresh when the inventory source updates, label cached information and preserve the stock reference when opening a support enquiry. Reviews retain a working photo or video collection when the other source is unavailable.
 
 ### Cloudinary video uploads
