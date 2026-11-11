@@ -3,6 +3,14 @@ compatibility_date = "2026-10-22"
 workers_dev = true
 preview_urls = true
 
+[[routes]]
+pattern = "thimadu.com/*"
+zone_name = "thimadu.com"
+
+[[routes]]
+pattern = "www.thimadu.com"
+custom_domain = true
+
 [assets]
 directory = "./dist"
 html_handling = "auto-trailing-slash"
