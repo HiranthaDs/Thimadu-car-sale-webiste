@@ -15,14 +15,23 @@ export default function App() {
   return <><Header/><PageTransition>{location => <><main id="main-content" tabIndex={-1}><div className="route-content" key={location.pathname}><Suspense fallback={<div className="route-loading" role="status"><span className="loading-ring"/>Preparing your next chapter…</div>}>
     <Routes location={location}>
       <Route path="/" element={<HomePage/>}/>
+      <Route path="/index" element={<HomePage/>}/>
       <Route path="/index.html" element={<HomePage/>}/>
+      <Route path="/all-vehicles" element={<InventoryPage/>}/>
       <Route path="/all-vehicles.html" element={<InventoryPage/>}/>
+      <Route path="/car-details" element={<VehicleDetailsPage/>}/>
       <Route path="/car-details.html" element={<VehicleDetailsPage/>}/>
+      <Route path="/services" element={<ServicesPage/>}/>
       <Route path="/services.html" element={<ServicesPage/>}/>
+      <Route path="/aboutus" element={<AboutPage/>}/>
       <Route path="/aboutus.html" element={<AboutPage/>}/>
+      <Route path="/reviews" element={<ReviewsPage/>}/>
       <Route path="/reviews.html" element={<ReviewsPage/>}/>
+      <Route path="/sell-your-vehicle-sri-lanka" element={<ServicePage kind="sell"/>}/>
       <Route path="/sell-your-vehicle-sri-lanka.html" element={<ServicePage kind="sell"/>}/>
+      <Route path="/vehicle-sourcing-sri-lanka" element={<ServicePage kind="sourcing"/>}/>
       <Route path="/vehicle-sourcing-sri-lanka.html" element={<ServicePage kind="sourcing"/>}/>
+      <Route path="/vehicle-information-support" element={<ServicePage kind="support"/>}/>
       <Route path="/vehicle-information-support.html" element={<ServicePage kind="support"/>}/>
       <Route path="*" element={<NotFoundPage/>}/>
     </Routes>

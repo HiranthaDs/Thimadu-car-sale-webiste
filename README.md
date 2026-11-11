@@ -67,6 +67,16 @@ Enquiry forms validate details and open a WhatsApp draft to `+94 77 181 3928`. V
 
 Publish the **contents of `dist/`** at the domain root, preserving the generated HTML entries, asset directories and query strings. Configure the host to return `404.html` with HTTP 404 for unknown URLs. The source folder is not the deployment output. The project has not been deployed during this work.
 
+The repository is configured for Cloudflare Workers Static Assets. After authenticating Wrangler once, build and deploy with:
+
+```powershell
+npm.cmd ci
+npm.cmd test
+npm.cmd run deploy
+```
+
+`npm.cmd run deploy:check` performs the complete production build and validates the Cloudflare bundle without publishing it. The deployment serves `dist/` directly from Cloudflare, so it does not depend on a separate origin web server and cannot produce an origin-timeout (522) during normal static delivery.
+
 Before building for a known domain, run the existing sitemap generator:
 
 ```powershell

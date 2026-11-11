@@ -12,6 +12,9 @@ await context.route('https://docs.google.com/spreadsheets/d/*/gviz/**',route=>{
   const data=isVideo?[{id:'video',headline:'A test video',description:'Fixture only',video_url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',thumbnail_url:`${base}/images/hero.webp`,status:'Active',posted_date:'2026-09-20'}]:Array.from({length:14},(_,i)=>({id:`photo-${i}`,headline:`Customer moment ${String(i).padStart(2,'0')}`,description:'Synthetic test fixture',customer_name:`Customer ${i}`,image_url:`${base}/images/journey.webp`,status:i===13?'Inactive':'Active',posted_date:`2026-09-${String(i+1).padStart(2,'0')}`}));
   const keys=Object.keys(data[0]);route.fulfill({contentType:'text/javascript',body:`${callback}(${JSON.stringify({status:'ok',table:{cols:keys.map(label=>({label})),rows:data.map(row=>({c:keys.map(key=>({v:row[key]}))}))}})})`});
 });
+// Keep this browser test deterministic and prevent it from reading the live
+// admin API. The mocked published-sheet response above is the test fixture.
+await context.route('https://script.google.com/macros/s/**',route=>route.abort());
 const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
 await page.goto(`${base}/all-vehicles.html`);
 await page.locator('.vehicle-card').first().waitFor();
